@@ -34,6 +34,7 @@ set(LIB_SOURCES
     src/node.c
     src/parser.c
     src/parser_native_funcs.c
+    src/scope_stack.c
     src/string.c
     src/vector.c)
 
@@ -47,6 +48,7 @@ set(HEADERS
     include/dae/node.h
     include/dae/parser.h
     include/dae/parser_native_funcs.h
+    include/dae/scope_stack.h
     include/dae/string.h
     include/dae/vector.h)
 

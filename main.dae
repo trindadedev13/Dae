@@ -1,6 +1,0 @@
-work main(): bool {
-  print -> "Hello, World!\n"
-  print -> "Opaaaaa\n"
-  print -> "\tOla\n"
-  return -> false
-}

@@ -26,4 +26,6 @@ void Vector_Insert(Vector*, const size_t, const void*);
 
 void Vector_PushBack(Vector*, const void*);
 
+void Vector_Remove(Vector*, size_t);
+
 #endif

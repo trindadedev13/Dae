@@ -6,8 +6,11 @@
 #include "dae/string.h"
 #include "dae/vector.h"
 
+typedef Vector HashMapVector;
+typedef Vector HashItemVector;
+
 typedef struct {
-  Vector* itens;
+  HashItemVector* itens;
   size_t itemSize;
   size_t capacity;
 } HashMap;

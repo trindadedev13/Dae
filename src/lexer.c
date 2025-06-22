@@ -14,6 +14,8 @@ Lexer* Lexer_New(String input) {
   lexer->__pos__ = 0;
   lexer->__input__ = strdup(input);
   lexer->tokens = Vector_New(sizeof(Token*));
+  lexer->__line__ = 1;
+  lexer->__column__ = 1;
   return lexer;
 }
 
@@ -28,11 +30,23 @@ void Lexer_Delete(Lexer* lexer) {
   free(lexer);
 }
 
-Token* Token_New(TokenType type, String text) {
+Token* Token_New(TokenType type, String text, size_t line, size_t column) {
   Token* tk = malloc(sizeof(Token));
   tk->type = type;
   tk->text = strdup(text);
+  tk->line = line;
+  tk->column = column;
   return tk;
+}
+
+void Lexer_Advance(Lexer* lexer) {
+  if (lexer->__input__[lexer->__pos__] == '\n') {
+    lexer->__line__++;
+    lexer->__column__ = 1;
+  } else {
+    lexer->__column__++;
+  }
+  lexer->__pos__++;
 }
 
 void Lexer_Tokenize(Lexer* lexer) {
@@ -40,55 +54,93 @@ void Lexer_Tokenize(Lexer* lexer) {
   while (lexer->__pos__ < inputLen) {
     char c = lexer->__input__[lexer->__pos__];
     if (isspace(c)) {
-      lexer->__pos__++;
+      Lexer_Advance(lexer);
       continue;
     }
+
     switch (c) {
       case '(': {
-        Token* token = Token_New(TOKEN_LPAREN, "(");
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_LPAREN, "(", tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
         continue;
       }
       case ')': {
-        Token* token = Token_New(TOKEN_RPAREN, ")");
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_RPAREN, ")", tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
         continue;
       }
       case '{': {
-        Token* token = Token_New(TOKEN_LBRACE, "{");
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_LBRACE, "{", tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
         continue;
       }
       case '}': {
-        Token* token = Token_New(TOKEN_RBRACE, "}");
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_RBRACE, "}", tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
         continue;
       }
       case ':': {
-        Token* token = Token_New(TOKEN_COLON, ":");
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_COLON, ":", tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
         continue;
       }
       case ',': {
-        Token* token = Token_New(TOKEN_COMMA, ",");
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_COMMA, ",", tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
+        continue;
+      }
+      case '=': {
+        size_t tkl = lexer->__line__;
+        size_t tkc = lexer->__column__;
+        Token* token = Token_New(TOKEN_ASSIGN, "=", tkl, tkc);
+        Vector_PushBack(lexer->tokens, &token);
+
+        Lexer_Advance(lexer);
+        continue;
+      }
+      case '\n': {
+        // lexer->__line__++;
+        //   lexer->__column__ = 1;
+        Lexer_Advance(lexer);
         continue;
       }
     };
+    if (String_StartsWith(lexer->__input__, "//", lexer->__pos__)) {
+      lexer->__pos__ += 2;
+      while (lexer->__pos__ < inputLen &&
+             lexer->__input__[lexer->__pos__] != '\n') {
+        Lexer_Advance(lexer);
+      }
+      continue;
+    }
     if (String_StartsWith(lexer->__input__, "->", lexer->__pos__)) {
-      Token* token = Token_New(TOKEN_ARROW, "->");
+      size_t tkl = lexer->__line__;
+      size_t tkc = lexer->__column__;
+      Token* token = Token_New(TOKEN_ARROW, "->", tkl, tkc);
       Vector_PushBack(lexer->tokens, &token);
 
       lexer->__pos__ += 2;
@@ -106,7 +158,9 @@ void Lexer_Tokenize(Lexer* lexer) {
         printf("Failed to get substr\n");
         break;
       }
-      Token* token = Token_New(TOKEN_STRING, str);
+      size_t tkl = lexer->__line__;
+      size_t tkc = lexer->__column__;
+      Token* token = Token_New(TOKEN_STRING, str, tkl, tkc);
       Vector_PushBack(lexer->tokens, &token);
       free(str);
 
@@ -117,16 +171,18 @@ void Lexer_Tokenize(Lexer* lexer) {
       size_t start = lexer->__pos__;
       while (lexer->__pos__ < inputLen &&
              isdigit(lexer->__input__[lexer->__pos__])) {
-        lexer->__pos__++;
+        Lexer_Advance(lexer);
+        lexer->__line__++;
       }
       String number = String_Substring(lexer->__input__, start, lexer->__pos__);
       if (number == NULL) {
         Error_Fatal("Failed to extract number");
       }
-      Token* token = Token_New(TOKEN_NUMBER, number);
+      size_t tkl = lexer->__line__;
+      size_t tkc = lexer->__column__;
+      Token* token = Token_New(TOKEN_NUMBER, number, tkl, tkc);
       Vector_PushBack(lexer->tokens, &token);
       free(number);
-
       continue;
     }
 
@@ -134,29 +190,36 @@ void Lexer_Tokenize(Lexer* lexer) {
       size_t start = lexer->__pos__;
       while (lexer->__pos__ < inputLen &&
              (isalpha(lexer->__input__[lexer->__pos__]) ||
-              isdigit(lexer->__input__[lexer->__pos__])))
-        lexer->__pos__++;
+              isdigit(lexer->__input__[lexer->__pos__]))) {
+        Lexer_Advance(lexer);
+      }
       String word = String_Substring(lexer->__input__, start, lexer->__pos__);
       if (word == NULL) {
         Error_Fatal("Failed to get word");
         break;
       }
-
+      size_t tkl = lexer->__line__;
+      size_t tkc = lexer->__column__;
       if (String_Equals(word, "work") || String_Equals(word, "return")) {
-        Token* token = Token_New(TOKEN_KEYWORD, word);
+        Token* token = Token_New(TOKEN_KEYWORD, word, tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
       } else if (String_Equals(word, "true") || String_Equals(word, "false")) {
-        Token* token = Token_New(TOKEN_BOOLEAN, word);
+        Token* token = Token_New(TOKEN_BOOL, word, tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
 
-      } else if (String_Equals(word, "bool") || String_Equals(word, "int") ||
-                 String_Equals(word, "string")) {
-        Token* token = Token_New(TOKEN_TYPE, word);
+      } else if (String_Equals(word, "bool") || String_Equals(word, "number") ||
+                 String_Equals(word, "string") || String_Equals(word, "any")) {
+        Token* token = Token_New(TOKEN_TYPE, word, tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
-
-      } else if (word != NULL) {
-        Token* token = Token_New(TOKEN_IDENTIFIER, word);
+      } else if (String_Equals(word, "var")) {
+        Token* token = Token_New(TOKEN_VAR, word, tkl, tkc);
+        Vector_PushBack(lexer->tokens, &token);
+      } else if (String_Equals(word, "let")) {
+        Token* token = Token_New(TOKEN_LET, word, tkl, tkc);
+        Vector_PushBack(lexer->tokens, &token);
+      } else {
+        Token* token = Token_New(TOKEN_IDENTIFIER, word, tkl, tkc);
         Vector_PushBack(lexer->tokens, &token);
       }
       free(word);
@@ -164,6 +227,8 @@ void Lexer_Tokenize(Lexer* lexer) {
     }
     printf("Unexpected character %c\n", c);
   }
-  Token* token = Token_New(TOKEN_EOF, "");
+  size_t tkl = lexer->__line__;
+  size_t tkc = lexer->__column__;
+  Token* token = Token_New(TOKEN_EOF, "", tkl, tkc);
   Vector_PushBack(lexer->tokens, &token);
 }

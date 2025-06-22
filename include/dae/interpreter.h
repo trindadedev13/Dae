@@ -3,12 +3,14 @@
 
 #include "dae/hashmap.h"
 #include "dae/node.h"
+#include "dae/scope_stack.h"
 #include "dae/string.h"
 #include "dae/vector.h"
 
 typedef struct {
   HashMap* functions;
   HashMap* nativeFunctions;
+  ScopeStack* varStack;
 } Interpreter;
 
 typedef enum { IRT_FUNC, IRT_RETURN } InterpreterResultType;
@@ -24,7 +26,7 @@ void Interpreter_Delete(Interpreter*);
 
 InterpreterResult Interpreter_Run(Interpreter*);
 
-InterpreterResult Interpreter_RunFunc(Interpreter*, Node*);
+InterpreterResult Interpreter_RunFunc(Interpreter*, Node*, StringVector*);
 
 InterpreterResult Interpreter_RunNode(Interpreter*, Node*);
 

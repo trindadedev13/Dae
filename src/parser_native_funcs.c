@@ -42,13 +42,41 @@ String Parser_Native_Internal_InterpretEscapes(String input) {
   return output;
 }
 
-Node* Parser_Native_Print(StringVector* args) {
-  for (size_t i = 0; i < args->size; ++i) {
-    String arg = *(String*)Vector_Get(args, i);
-    String interpreted = Parser_Native_Internal_InterpretEscapes(arg);
+Node* Parser_Native_Print(NativeFnData* data) {
+  for (size_t i = 0; i < data->params->size; ++i) {
+    NodeFunctionParam* param =
+        *(NodeFunctionParam**)Vector_Get(data->params, i);
+    if (param->type == NODE_VALUE_TYPE_VAR) {
+      Node* var = ScopeStack_Get(data->varStack, param->value);
+      void* value = var->vardec_n.varValue;
+      switch (var->vardec_n.varValueType) {
+        case NODE_VALUE_TYPE_NUMBER: {
+          printf("%d", (int)(intptr_t)value);
+          break;
+        }
+        case NODE_VALUE_TYPE_STRING:
+          printf("%s", (String)value);
+          break;
+        case NODE_VALUE_TYPE_BOOL:
+          printf("%s", (bool)(intptr_t)value ? "true" : "false");
+          break;
+        case NODE_VALUE_TYPE_FUNC:
+          // Does nothing for now
+          break;
+        case NODE_VALUE_TYPE_VAR:
+          // Does nothing for now
+          break;
+        default:
+          // Does nothing for now
+          break;
+      }
+      free(data);
+      return NULL;
+    }
+    String interpreted = Parser_Native_Internal_InterpretEscapes(param->value);
     printf("%s", interpreted);
     free(interpreted);
   }
-  Parser_DeleteArgs(args);
+  free(data);
   return NULL;
 }

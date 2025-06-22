@@ -12,12 +12,12 @@
 File* File_Open(String filePath, String mode) {
   File* file = malloc(sizeof(File));
   if (file == NULL) {
-    Error_Fatal("Failed to allocate memory to open %s\n", filePath);
+    Error_Fatal("Failed to open %s", filePath);
     return NULL;
   }
   file->stdFile = fopen(filePath, mode);
   if (file->stdFile == NULL) {
-    Error_Fatal("Failed to allocate memory to open %s\n", filePath);
+    Error_Fatal("Failed to open %s", filePath);
     return NULL;
   }
   file->path = filePath;
@@ -47,7 +47,7 @@ String File_ReadText(File* file) {
   size_t fileLen = File_GetLength(file);
   String buffer = malloc(fileLen + 1);  // 1 for null-terminate
   if (buffer == NULL) {
-    Error_Fatal("Failed to allocate memory to read file %s\n", file->path);
+    Error_Fatal("Failed to allocate memory to read file %s", file->path);
     return NULL;
   }
   fread(buffer, 1, fileLen, file->stdFile);  // read file into buffer

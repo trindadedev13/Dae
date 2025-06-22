@@ -56,14 +56,23 @@ void String_Concat(String dest, const String toConcat) {
 
 int String_ToInt(const String src) {
   int num = 0;
-  for (int i = 0; i < String_Length(src); ++i) {
-    if (src[i] >= 48 && src[i] <= 57) {
-      num = num * 10 + (src[i] - 48);
+  int i = 0;
+  int sign = 1;
+
+  if (src[0] == '-') {
+    sign = -1;
+    i = 1;
+  }
+
+  for (; i < String_Length(src); ++i) {
+    if (src[i] >= '0' && src[i] <= '9') {
+      num = num * 10 + (src[i] - '0');
     } else {
       break;
     }
   }
-  return num;
+
+  return sign * num;
 }
 
 String String_Format(const String fmt, ...) {

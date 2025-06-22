@@ -1,0 +1,5 @@
+import stream.dae
+
+work print(const string text) {
+  stdout.write -> text
+}

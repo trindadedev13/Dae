@@ -1,0 +1,31 @@
+work println(any: message) {
+  print -> message
+  print -> "\n"
+}
+
+work printlnd(any: message, any: m2) {
+  print -> message
+  print -> "\n"
+  print -> m2
+  print -> "\n"
+}
+
+
+work main(): bool {
+  string var1 = "isso é uma variável usando tipagem estatica!"
+  let var2 = "isso é uma variável usando tipagem dinamica let!"
+  var var3 = "isso é uma variável usando tipagem dinâmica var!"
+
+  number var1n = 10 // numero
+  bool var1b = false // bool
+
+  println -> var1
+  println -> var2
+  println -> var3
+  println -> var1n
+  println -> var1b
+
+  //printlnd -> var1, var1b
+
+  return -> true
+}

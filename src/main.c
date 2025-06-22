@@ -42,17 +42,17 @@ bool Run(int argc, char* argv[]) {
   if (String_Equals(action, "run")) {
     // TODO: SUPPORT MULTIPLES FILES
     if (argc < 3) {
-      Error_Fatal("Please provide at least 1 file!\n");
+      Error_Fatal("Please provide at least 1 file!");
       return false;
     }
     File* file = File_Open(argv[2], FileMode_Read);
     if (file == NULL) {
-      Error_Fatal("Failed to open %s\n", argv[2]);
+      Error_Fatal("Failed to open %s", argv[2]);
       return false;
     }
     String src = File_ReadText(file);
     if (src == NULL) {
-      Error_Fatal("Failed to read %s\n", argv[2]);
+      Error_Fatal("Failed to read %s", argv[2]);
       return false;
     }
     bool interRes = Interpret(src);

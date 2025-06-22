@@ -1,0 +1,19 @@
+
+abstract struct Stream {
+  work write(any: data)
+  work read(): <?>
+}
+
+struct StdOutStream: Stream {
+  override work write(any: data) {
+    write_native -> data
+  }
+  override work read(): <?> {
+     return -> read_native
+  }
+  // Native functions
+  native work writeNative(any: data)
+  native work readNative(): <?>
+}
+
+const StdOutStream stdout = StdOutStream()

@@ -20,7 +20,6 @@ Vector* Vector_New(size_t itemSize) {
 
 void Vector_Delete(Vector* self) {
   assert(self);
-
   free(self->data);
   free(self);
 }
@@ -42,14 +41,14 @@ void Vector_Reserve(Vector* self, const size_t size) {
   }
 }
 
-void Vector_Set(Vector* self, const size_t index, const void* item) {
+void Vector_Set(Vector* self, size_t index, const void* item) {
   assert(self);
   assert(index < self->size);
 
   memcpy((char*)self->data + index * self->itemSize, item, self->itemSize);
 }
 
-void Vector_Insert(Vector* self, const size_t index, const void* item) {
+void Vector_Insert(Vector* self, size_t index, const void* item) {
   assert(self);
   assert(index <= self->size);
 
@@ -66,4 +65,15 @@ void Vector_Insert(Vector* self, const size_t index, const void* item) {
 
 void Vector_PushBack(Vector* self, const void* item) {
   Vector_Insert(self, self->size, item);
+}
+
+void Vector_Remove(Vector* self, size_t index) {
+  assert(self);
+  assert(index < self->size);
+  if (index < self->size - 1) {
+    memmove((char*)self->data + index * self->itemSize,
+            (char*)self->data + (index + 1) * self->itemSize,
+            (self->size - index - 1) * self->itemSize);
+  }
+  self->size--;
 }

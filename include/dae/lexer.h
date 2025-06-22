@@ -16,60 +16,75 @@ typedef enum {
   TOKEN_ARROW,       // ->
   TOKEN_COLON,       // :
   TOKEN_TYPE,        // bool
-  TOKEN_BOOLEAN,     // true, false
+  TOKEN_BOOL,        // true, false
   TOKEN_NUMBER,      // number 1 2 3..
-  TOKEN_COMMA,       // ,
+  TOKEN_COMMA,       // ,,
+  TOKEN_ASSIGN,      // =
+  TOKEN_VAR,         // var
+  TOKEN_LET,         // let
   TOKEN_EOF          // end of file.
 } TokenType;
 
 static String Token_GetTypeName(TokenType type) {
   switch (type) {
     case TOKEN_KEYWORD:
-      return "Keyword";
+      return "keyword";
     case TOKEN_IDENTIFIER:
-      return "Identifier";
+      return "identifier";
     case TOKEN_STRING:
-      return "String";
+      return "string";
     case TOKEN_LPAREN:
-      return "Left Parenthesis";
+      return "left_parenthesis";
     case TOKEN_RPAREN:
-      return "Right Parenthesis";
+      return "right_parenthesis";
     case TOKEN_LBRACE:
-      return "Left Brace";
+      return "left_brace";
     case TOKEN_RBRACE:
-      return "Right Brace";
+      return "right_brace";
     case TOKEN_ARROW:
-      return "Arrow";
+      return "arrow";
     case TOKEN_COLON:
-      return "Colon";
+      return "colon";
     case TOKEN_TYPE:
-      return "Type";
-    case TOKEN_BOOLEAN:
-      return "Boolean";
+      return "type";
+    case TOKEN_BOOL:
+      return "boolean";
     case TOKEN_NUMBER:
-      return "Number";
+      return "number";
     case TOKEN_COMMA:
-      return "Comma";
+      return "comma";
+    case TOKEN_ASSIGN:
+      return "assign";
+    case TOKEN_LET:
+      return "let";
+    case TOKEN_VAR:
+      return "var";
     case TOKEN_EOF:
-      return "End of File";
+      return "end_of_file";
     default:
-      return "Invalid Token";
+      return "unknow_token";
   };
 }
 
 typedef struct {
   TokenType type;
   String text;
+
+  size_t column;
+  size_t line;
 } Token;
 
 typedef Vector TokenVector;
 
-Token* Token_New(TokenType type, String text);
+Token* Token_New(TokenType, String, size_t, size_t);
 
 typedef struct {
   String __input__;
   TokenVector* tokens;
-  unsigned int __pos__;
+
+  size_t __pos__;
+  size_t __column__;
+  size_t __line__;
 } Lexer;
 
 Lexer* Lexer_New(String);

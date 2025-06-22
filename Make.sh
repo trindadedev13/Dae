@@ -25,7 +25,7 @@ print_help_and_close() {
   echo -e "$LGREEN-t  or --termux  | $LMAGENTA [USE WITH -r] Compile and run it fixing termux restrictions."
   echo -e "$LGREEN-h  or --help    | $LMAGENTA Prints help."
   echo -e "$LGREEN-as or --asan    | $LMAGENTA Enables Address Sanitizer."
-  echo -e "$LGREEN-c  or --clean    | $LMAGENTA Cleanup build before build again."
+  echo -e "$LGREEN-c  or --clean   | $LMAGENTA Cleanup build before build again."
   echo ""
   echo -e "$YELLOW"
   echo "WARNING"
@@ -119,5 +119,3 @@ if [ "$INSTALL_P" = false ]; then
     ./dae run main.dae
   fi
 fi
-
-# ./dae
