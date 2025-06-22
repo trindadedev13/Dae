@@ -15,4 +15,6 @@ String Parser_Native_Internal_InterpretEscapes(String);
 
 Node* Parser_Native_Print(NativeFnData*);
 
+Node* Parser_Native_System(NativeFnData*);
+
 #endif

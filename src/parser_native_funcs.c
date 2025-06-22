@@ -80,3 +80,26 @@ Node* Parser_Native_Print(NativeFnData* data) {
   free(data);
   return NULL;
 }
+
+Node* Parser_Native_System(NativeFnData* data) {
+  for (size_t i = 0; i < data->params->size; ++i) {
+    NodeFunctionParam* param =
+        *(NodeFunctionParam**)Vector_Get(data->params, i);
+    if (param->type == NODE_VALUE_TYPE_VAR) {
+      Node* var = ScopeStack_Get(data->varStack, param->value);
+      void* value = var->vardec_n.varValue;
+      switch (var->vardec_n.varValueType) {
+        case NODE_VALUE_TYPE_STRING:
+          system((String)value);
+          break;
+        default:
+          break;
+      }
+      free(data);
+      return NULL;
+    }
+    system(param->value);
+  }
+  free(data);
+  return NULL;
+}

@@ -129,6 +129,14 @@ void Parser_Native_RegisterAllFunctions(Parser* parser) {
     Parser_Native_RegisterFunction(parser, "print", requiredParams,
                                    Parser_Native_Print);
   }
+  {
+    // Register native system method
+    StringVector* requiredParams = Vector_New(sizeof(String*));
+    String str = "string";
+    Vector_PushBack(requiredParams, &str);
+    Parser_Native_RegisterFunction(parser, "system", requiredParams,
+                                   Parser_Native_System);
+  }
 }
 
 String Parser_TokenTypeToString(TokenType type) {

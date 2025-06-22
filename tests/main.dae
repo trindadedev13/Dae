@@ -10,7 +10,6 @@ work printlnd(any: message, any: m2) {
   print -> "\n"
 }
 
-
 work main(): bool {
   string var1 = "isso é uma variável usando tipagem estatica!"
   let var2 = "isso é uma variável usando tipagem dinamica let!"
@@ -25,7 +24,9 @@ work main(): bool {
   println -> var1n
   println -> var1b
 
-  //printlnd -> var1, var1b
+  system -> "ls"
+
+  printlnd -> var1, var1b
 
   return -> true
 }
