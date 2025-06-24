@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "dae/string.h"
+#include "kilate/string.h"
 
 #define FileMode_Read "r"
 #define FileMode_Write "w"

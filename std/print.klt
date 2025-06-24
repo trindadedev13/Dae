@@ -1,0 +1,7 @@
+// EXAMPLE!!! FILE OF REAL STANDARD LIBRARY PRINT.
+
+import "kilate/stream.klt"
+
+work print(const string text) {
+  stdout.write -> text
+}

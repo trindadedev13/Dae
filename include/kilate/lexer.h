@@ -1,9 +1,9 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "dae/inline.h"
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/inline.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 typedef enum {
   TOKEN_KEYWORD,     // work, return

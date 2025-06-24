@@ -1,8 +1,8 @@
-#include "dae/string.h"
+#include "kilate/string.h"
 
 #include <stdlib.h>
 
-#include "dae/error.h"
+#include "kilate/error.h"
 
 size_t String_Length(String str) {
   size_t len = 0;

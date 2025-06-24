@@ -1,12 +1,12 @@
-#include "dae/parser_native_funcs.h"
+#include "kilate/parser_native_funcs.h"
 
 #include <stdio.h>
 
-#include "dae/lexer.h"
-#include "dae/node.h"
-#include "dae/parser.h"
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/lexer.h"
+#include "kilate/node.h"
+#include "kilate/parser.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 #include <stdlib.h>
 #include <string.h>

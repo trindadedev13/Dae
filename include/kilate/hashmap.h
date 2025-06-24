@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 typedef Vector HashMapVector;
 typedef Vector HashItemVector;

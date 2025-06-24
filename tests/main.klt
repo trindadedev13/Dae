@@ -1,0 +1,16 @@
+work println(any: message) {
+  print -> message
+  print -> "\n"
+}
+
+work testVarsScope() {
+  // expected: Error!
+  println -> varInMain
+}
+
+work main(): bool {
+  let varInMain = "Opa"
+  println -> varInMain
+  testVarsScope()
+  return -> true
+}

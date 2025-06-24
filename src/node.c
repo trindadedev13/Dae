@@ -1,9 +1,9 @@
-#include "dae/node.h"
+#include "kilate/node.h"
 
 #include <stdlib.h>
 
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 Node* FunctionNode_New(String name,
                        String returnType,

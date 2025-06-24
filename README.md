@@ -1,4 +1,4 @@
-# Dae
+# Kilate
 - An easy interpreted programming language.
 
 ## Syntax
@@ -15,17 +15,17 @@ work main(): bool {
 }
 ```
 
-## How to install Dae-Interpreter
+## How to install Kilate-Interpreter
 
-### 🐧 Linux (ou Windows com WSL)
+### 🐧 Linux
 
 > Requirements: cmake, make, C++ compiler (g++ or clang)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/trindadedev13/dae.git
-cd dae-c
+git clone https://github.com/trindadedev13/kilate.git
+cd kilate
 ```
 
 ### 2. Allow make.sh to run
@@ -40,15 +40,15 @@ chmod +x Make.sh
 ./Make.sh -i
 ```
 
-## How to use Dae-Interpreter
+## How to use Kilate-Interpreter
 Below we have the basic interpreter commands.
 
 ## Run
 ```bash
-dae run <files>
+kilate run <files>
 ```
 
 ## Help
 ```bash
-dae help
+kilate help
 ```

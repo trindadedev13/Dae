@@ -1,9 +1,9 @@
 #ifndef SCOPE_STACK_H
 #define SCOPE_STACK_H
 
-#include "dae/hashmap.h"
-#include "dae/node.h"
-#include "dae/string.h"
+#include "kilate/hashmap.h"
+#include "kilate/node.h"
+#include "kilate/string.h"
 
 #define MAX_SCOPE_DEPTH 64
 

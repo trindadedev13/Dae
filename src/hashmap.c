@@ -1,11 +1,11 @@
-#include "dae/hashmap.h"
+#include "kilate/hashmap.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "dae/string.h"
+#include "kilate/string.h"
 
 HashMap* HashMap_New(size_t itemSize) {
   HashMap* hashMap = malloc(sizeof(HashMap));

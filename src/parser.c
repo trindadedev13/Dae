@@ -1,14 +1,14 @@
-#include "dae/parser.h"
+#include "kilate/parser.h"
 
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "dae/lexer.h"
-#include "dae/node.h"
-#include "dae/parser_native_funcs.h"
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/lexer.h"
+#include "kilate/node.h"
+#include "kilate/parser_native_funcs.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 Parser* Parser_New(TokenVector* tokens) {
   Parser* parser = malloc(sizeof(Parser));
@@ -30,15 +30,18 @@ void Parser_Delete(Parser* parser) {
       }
       // free body nodes
       for (size_t j = 0; j < node->function_n.body->size; ++j) {
-        Node* bodyNode = *(Node**)Vector_Get(node->function_n.body, j);
-        if (bodyNode->type == NODE_CALL) {
-          free(bodyNode->call_n.functionName);
-          Parser_DeleteParams(bodyNode->call_n.functionParams);
-        } else if (bodyNode->type == NODE_VARDEC) {
-          free(bodyNode->vardec_n.varName);
-          free(bodyNode->vardec_n.varType);
+        Node** bodyNodePtr = (Node**)Vector_Get(node->function_n.body, j);
+        if (bodyNodePtr != NULL) {
+          Node* bodyNode = *bodyNodePtr;
+          if (bodyNode->type == NODE_CALL) {
+            free(bodyNode->call_n.functionName);
+            Parser_DeleteParams(bodyNode->call_n.functionParams);
+          } else if (bodyNode->type == NODE_VARDEC) {
+            free(bodyNode->vardec_n.varName);
+            free(bodyNode->vardec_n.varType);
+          }
+          free(bodyNode);
         }
-        free(bodyNode);
       }
       Vector_Delete(node->function_n.body);
       // free param nodes

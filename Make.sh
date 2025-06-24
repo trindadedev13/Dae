@@ -16,7 +16,7 @@ LMAGENTA="\e[95m"
 RESET="\e[0m"
 
 print_help_and_close() {
-  echo -e "$BLUE Script to compile & install dae"
+  echo -e "$BLUE Script to compile & install kilate"
   echo -e "$RESET"
   echo "Usage Make.sh <option>"
   echo "Options:"
@@ -110,12 +110,12 @@ fi
 if [ "$INSTALL_P" = false ]; then
   if [ "$RUN_P" = true ]; then
     if [ "$TERMUX_P" = true ]; then
-      cp dae $HOME
+      cp kilate $HOME
       cd $HOME
-      chmod +x dae
+      chmod +x kilate
     else
-      chmod +x dae
+      chmod +x kilate
     fi
-    ./dae run main.dae
+    ./kilate run main.kilate
   fi
 fi

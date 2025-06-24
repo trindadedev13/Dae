@@ -1,4 +1,4 @@
-#include "dae/lexer.h"
+#include "kilate/lexer.h"
 
 #include <ctype.h>
 #include <stdint.h>
@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dae/error.h"
-#include "dae/string.h"
+#include "kilate/error.h"
+#include "kilate/string.h"
 
 Lexer* Lexer_New(String input) {
   Lexer* lexer = malloc(sizeof(Lexer));

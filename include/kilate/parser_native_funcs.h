@@ -1,10 +1,10 @@
 #ifndef PARSER_NATIVE_FUNCS
 #define PARSER_NATIVE_FUNCS
 
-#include "dae/lexer.h"
-#include "dae/node.h"
-#include "dae/scope_stack.h"
-#include "dae/vector.h"
+#include "kilate/lexer.h"
+#include "kilate/node.h"
+#include "kilate/scope_stack.h"
+#include "kilate/vector.h"
 
 typedef struct {
   ScopeStack* varStack;

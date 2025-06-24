@@ -3,7 +3,7 @@
 
 #include <stdarg.h>
 
-#include "dae/string.h"
+#include "kilate/string.h"
 
 void Error_Fatal(String, ...);
 

@@ -1,9 +1,9 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "dae/lexer.h"
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/lexer.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 typedef enum {
   NODE_FUNCTION,

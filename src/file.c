@@ -1,10 +1,10 @@
-#include "dae/file.h"
+#include "kilate/file.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "dae/error.h"
-#include "dae/string.h"
+#include "kilate/error.h"
+#include "kilate/string.h"
 
 // Opens a file
 // After do all uses with file, close it

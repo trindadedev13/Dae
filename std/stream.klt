@@ -1,3 +1,4 @@
+// EXAMPLE!!! FILE OF REAL STANDARD LIBRARY STREAM.
 
 abstract struct Stream {
   work write(any: data)

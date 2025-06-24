@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(PROJECT_NAME dae)
+set(PROJECT_NAME kilate)
 project(${PROJECT_NAME} LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
@@ -39,18 +39,18 @@ set(LIB_SOURCES
     src/vector.c)
 
 set(HEADERS
-    include/dae/error.h
-    include/dae/file.h
-    include/dae/hashmap.h
-    include/dae/inline.h
-    include/dae/interpreter.h
-    include/dae/lexer.h
-    include/dae/node.h
-    include/dae/parser.h
-    include/dae/parser_native_funcs.h
-    include/dae/scope_stack.h
-    include/dae/string.h
-    include/dae/vector.h)
+    include/kilate/error.h
+    include/kilate/file.h
+    include/kilate/hashmap.h
+    include/kilate/inline.h
+    include/kilate/interpreter.h
+    include/kilate/lexer.h
+    include/kilate/node.h
+    include/kilate/parser.h
+    include/kilate/parser_native_funcs.h
+    include/kilate/scope_stack.h
+    include/kilate/string.h
+    include/kilate/vector.h)
 
 set(EXE_SOURCES
     src/main.c)
@@ -64,12 +64,12 @@ target_include_directories(${PROJECT_NAME}_lib
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-add_library(Dae::DaeC ALIAS ${PROJECT_NAME}_lib)
+add_library(Kilate::KilateC ALIAS ${PROJECT_NAME}_lib)
 
 add_executable(${PROJECT_NAME} ${EXE_SOURCES})
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-    Dae::DaeC)
+    Kilate::KilateC)
 
 if(INSTALL)
   # install cli executable
@@ -90,6 +90,6 @@ if(INSTALL)
 
   # exports targets
   install(EXPORT ${PROJECT_NAME}Targets
-    NAMESPACE Dae::
+    NAMESPACE Kilate::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 endif()

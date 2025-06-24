@@ -1,10 +1,10 @@
-#include "dae/scope_stack.h"
+#include "kilate/scope_stack.h"
 
 #include <stdlib.h>
 
-#include "dae/error.h"
-#include "dae/node.h"  // Para Node_Delete
-#include "dae/vector.h"
+#include "kilate/error.h"
+#include "kilate/node.h"  // Para Node_Delete
+#include "kilate/vector.h"
 
 ScopeStack* ScopeStack_New() {
   ScopeStack* stack = malloc(sizeof(ScopeStack));

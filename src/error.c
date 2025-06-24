@@ -1,10 +1,10 @@
-#include "dae/error.h"
+#include "kilate/error.h"
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "dae/string.h"
+#include "kilate/string.h"
 
 void Error_Fatal(String fmt, ...) {
   va_list args;

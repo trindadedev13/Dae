@@ -1,12 +1,12 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "dae/error.h"
-#include "dae/file.h"
-#include "dae/interpreter.h"
-#include "dae/lexer.h"
-#include "dae/parser.h"
-#include "dae/string.h"
+#include "kilate/error.h"
+#include "kilate/file.h"
+#include "kilate/interpreter.h"
+#include "kilate/lexer.h"
+#include "kilate/parser.h"
+#include "kilate/string.h"
 
 bool Interpret(String src) {
   Lexer* lexer = Lexer_New(src);
@@ -26,8 +26,8 @@ bool Interpret(String src) {
 
   assert(result.data);
 
-  Interpreter_Delete(interpreter);
   Parser_Delete(parser);
+  Interpreter_Delete(interpreter);
   Lexer_Delete(lexer);
   return true;
 }
@@ -61,7 +61,7 @@ bool Run(int argc, char* argv[]) {
     return interRes;
   } else if (String_Equals(action, "help")) {
     printf("%s help        : prints help\n", argv[0]);
-    printf("%s run <files> : executes an dae file.\n", argv[0]);
+    printf("%s run <files> : executes an kilate file.\n", argv[0]);
     return true;
   }
   return false;

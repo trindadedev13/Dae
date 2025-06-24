@@ -1,11 +1,11 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include "dae/hashmap.h"
-#include "dae/node.h"
-#include "dae/scope_stack.h"
-#include "dae/string.h"
-#include "dae/vector.h"
+#include "kilate/hashmap.h"
+#include "kilate/node.h"
+#include "kilate/scope_stack.h"
+#include "kilate/string.h"
+#include "kilate/vector.h"
 
 typedef struct {
   HashMap* functions;

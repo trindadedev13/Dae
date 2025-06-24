@@ -1,14 +1,14 @@
-#include "dae/interpreter.h"
+#include "kilate/interpreter.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "dae/error.h"
-#include "dae/hashmap.h"
-#include "dae/node.h"
-#include "dae/parser.h"
-#include "dae/scope_stack.h"
+#include "kilate/error.h"
+#include "kilate/hashmap.h"
+#include "kilate/node.h"
+#include "kilate/parser.h"
+#include "kilate/scope_stack.h"
 
 Interpreter* Interpreter_New(NodeVector* funcNodes,
                              NodeVector* nativeFunctionsNodes) {
@@ -85,7 +85,6 @@ InterpreterResult Interpreter_RunFunc(Interpreter* self,
       NodeValueType actualType = param->type;
       void* actualValue = param->value;
 
-      // Se for uma variável, resolva
       if (param->type == NODE_VALUE_TYPE_VAR) {
         Node* realVar = ScopeStack_Get(self->varStack, (String)param->value);
         if (realVar == NULL) {
@@ -116,6 +115,7 @@ InterpreterResult Interpreter_RunFunc(Interpreter* self,
       Node* stmt = *stmtPtr;
       InterpreterResult result = Interpreter_RunNode(self, stmt);
       if (result.type == IRT_RETURN) {
+        ScopeStack_Pop(self->varStack);
         return result;
       }
     }
