@@ -554,7 +554,7 @@ void Parser_ParseProgram(Parser* parser) {
 void Parser_Error(Token* tk, String fmt, ...) {
   va_list args;
   va_start(args, fmt);
-  fprintf(stderr, "[Error At %lu:%lu] ", tk->line, tk->column);
+  fprintf(stderr, "[Error At %zu:%zu] ", tk->line, tk->column);
   vprintf(fmt, args);
   printf("\n");
   va_end(args);
