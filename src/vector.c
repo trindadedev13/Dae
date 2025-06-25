@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 Vector* Vector_New(size_t itemSize) {
   Vector* self = malloc(sizeof(Vector));

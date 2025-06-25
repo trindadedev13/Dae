@@ -1,6 +1,7 @@
 #include "kilate/node.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "kilate/string.h"
 #include "kilate/vector.h"
