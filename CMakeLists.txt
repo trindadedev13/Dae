@@ -6,20 +6,17 @@ project(${PROJECT_NAME} LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-if(DEFINED ENV{INSTALL})
-  set(INSTALL TRUE)
-else()
-  set(INSTALL FALSE)
-endif()
+option(BUILD_SHARED_LIBS "Build shared libraries (.so)" ON)
+option(BUILD_STATIC_LIBS "Build static libraries (.a)" ON)
+option(INSTALL "Install libkilate and executable." OFF)
+option(ASAN "Enable Address Sanitizer" OFF)
 
-
-if(DEFINED ENV{ASAN})
+if(ASAN)
   message(STATUS "AddressSanitizer enabled")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 endif()
-
 
 if(INSTALL)
   include(GNUInstallDirs)
@@ -55,40 +52,59 @@ set(HEADERS
 set(EXE_SOURCES
     src/main.c)
 
-add_library(${PROJECT_NAME}_lib STATIC
-    ${LIB_SOURCES}
-    ${HEADERS})
 
-target_include_directories(${PROJECT_NAME}_lib
+if(BUILD_SHARED_LIBS)
+  add_library(${PROJECT_NAME}_shared SHARED ${LIB_SOURCES} ${HEADERS})
+  set_target_properties(${PROJECT_NAME}_shared PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+  target_include_directories(${PROJECT_NAME}_shared
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  add_library(Kilate::KilateShared ALIAS ${PROJECT_NAME}_shared)
+endif()
 
-add_library(Kilate::KilateC ALIAS ${PROJECT_NAME}_lib)
+if(BUILD_STATIC_LIBS)
+  add_library(${PROJECT_NAME}_static STATIC ${LIB_SOURCES} ${HEADERS})
+  set_target_properties(${PROJECT_NAME}_static PROPERTIES OUTPUT_NAME ${PROJECT_NAME}_static)
+  target_include_directories(${PROJECT_NAME}_static
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  add_library(Kilate::Kilate ALIAS ${PROJECT_NAME}_static)
+endif()
 
+# Main Binary
 add_executable(${PROJECT_NAME} ${EXE_SOURCES})
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-    Kilate::KilateC)
+  PRIVATE
+  Kilate::Kilate)
 
 if(INSTALL)
-  # install cli executable
+  include(GNUInstallDirs)
+
   install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-  # install lib
-  install(TARGETS ${PROJECT_NAME}_lib
-    EXPORT ${PROJECT_NAME}Targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  if(BUILD_STATIC_LIBS)
+    install(TARGETS ${PROJECT_NAME}_static
+      EXPORT ${PROJECT_NAME}Targets
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  endif()
 
-  # install headers
+  if(BUILD_SHARED_LIBS)
+    install(TARGETS ${PROJECT_NAME}_shared
+      EXPORT ${PROJECT_NAME}Targets
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  endif()
+
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
 
-  # exports targets
   install(EXPORT ${PROJECT_NAME}Targets
     NAMESPACE Kilate::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
