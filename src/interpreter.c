@@ -115,7 +115,8 @@ InterpreterResult Interpreter_RunFunc(Interpreter* self,
       Node* stmt = *stmtPtr;
       InterpreterResult result = Interpreter_RunNode(self, stmt);
       if (result.type == IRT_RETURN) {
-        ScopeStack_Pop(self->varStack);
+        // Error Here
+        // ScopeStack_Pop(self->varStack);
         return result;
       }
     }
