@@ -1,8 +1,9 @@
 #include "kilate/lexer.h"
 
 #include <ctype.h>
-#include <stdint.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -128,6 +129,10 @@ void Lexer_Tokenize(Lexer* lexer) {
         Lexer_Advance(lexer);
         continue;
       }
+      case ';': {
+        Lexer_Advance(lexer);
+        continue;
+      }
     };
     if (String_StartsWith(lexer->__input__, "//", lexer->__pos__)) {
       lexer->__pos__ += 2;
@@ -176,7 +181,7 @@ void Lexer_Tokenize(Lexer* lexer) {
       }
       String number = String_Substring(lexer->__input__, start, lexer->__pos__);
       if (number == NULL) {
-        Error_Fatal("Failed to extract number");
+        Lexer_Error(lexer, "Failed to extract number");
       }
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
@@ -195,7 +200,7 @@ void Lexer_Tokenize(Lexer* lexer) {
       }
       String word = String_Substring(lexer->__input__, start, lexer->__pos__);
       if (word == NULL) {
-        Error_Fatal("Failed to get word");
+        Lexer_Error(lexer, "Failed to get word");
         break;
       }
       size_t tkl = lexer->__line__;
@@ -225,10 +230,21 @@ void Lexer_Tokenize(Lexer* lexer) {
       free(word);
       continue;
     }
-    printf("Unexpected character %c\n", c);
+    Lexer_Error(lexer, "Unexpected character %c", c);
+    break;
   }
   size_t tkl = lexer->__line__;
   size_t tkc = lexer->__column__;
   Token* token = Token_New(TOKEN_EOF, "", tkl, tkc);
   Vector_PushBack(lexer->tokens, &token);
+}
+
+void Lexer_Error(Lexer* lexer, String fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  fprintf(stderr, "[Error at %zu:%zu] ", lexer->__line__, lexer->__column__);
+  vprintf(fmt, args);
+  printf("\n");
+  va_end(args);
+  exit(1);
 }

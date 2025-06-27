@@ -1,6 +1,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include <stdarg.h>
+
 #include "kilate/inline.h"
 #include "kilate/string.h"
 #include "kilate/vector.h"
@@ -92,5 +94,7 @@ Lexer* Lexer_New(String);
 void Lexer_Delete(Lexer*);
 
 void Lexer_Tokenize(Lexer*);
+
+void Lexer_Error(Lexer*, String, ...);
 
 #endif
