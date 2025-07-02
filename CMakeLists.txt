@@ -22,6 +22,9 @@ if(INSTALL)
   include(GNUInstallDirs)
 endif()
 
+set(CMAKE_EXE_LINKER_FLAGS
+    "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+
 set(LIB_SOURCES
     src/error.c
     src/file.c
@@ -30,7 +33,7 @@ set(LIB_SOURCES
     src/lexer.c
     src/node.c
     src/parser.c
-    src/parser_native_funcs.c
+    src/native.c
     src/scope_stack.c
     src/string.c
     src/vector.c)
@@ -39,12 +42,11 @@ set(HEADERS
     include/kilate/error.h
     include/kilate/file.h
     include/kilate/hashmap.h
-    include/kilate/inline.h
     include/kilate/interpreter.h
     include/kilate/lexer.h
     include/kilate/node.h
     include/kilate/parser.h
-    include/kilate/parser_native_funcs.h
+    include/kilate/native.h
     include/kilate/scope_stack.h
     include/kilate/string.h
     include/kilate/vector.h)

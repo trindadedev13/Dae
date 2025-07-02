@@ -7,32 +7,32 @@
 
 #include "kilate/string.h"
 
-HashMap* HashMap_New(size_t itemSize) {
-  HashMap* hashMap = malloc(sizeof(HashMap));
+klt_hashmap* klt_hash_map_make(size_t itemSize) {
+  klt_hashmap* hashMap = malloc(sizeof(klt_hashmap));
   hashMap->itemSize = itemSize;
   hashMap->capacity = 64;
-  hashMap->itens = Vector_New(sizeof(HashItem*));
+  hashMap->itens = klt_vector_make(sizeof(klt_hashitem*));
   for (int i = 0; i < hashMap->capacity; i++) {
-    HashItem* null_ptr = NULL;
-    Vector_PushBack(hashMap->itens, &null_ptr);
+    klt_hashitem* null_ptr = NULL;
+    klt_vector_push_back(hashMap->itens, &null_ptr);
   }
   return hashMap;
 }
 
-void HashMap_Delete(HashMap* self) {
+void klt_hash_map_delete(klt_hashmap* self) {
   for (size_t i = 0; i < self->itens->size; ++i) {
-    HashItem* item = *(HashItem**)Vector_Get(self->itens, i);
+    klt_hashitem* item = *(klt_hashitem**)klt_vector_get(self->itens, i);
     if (item != NULL) {
       free(item->key);
       free(item->value);
       free(item);
     }
   }
-  Vector_Delete(self->itens);
+  klt_vector_delete(self->itens);
   free(self);
 }
 
-unsigned int HashMap_Hash(HashMap* self, String key) {
+unsigned int klt_hash_map_hash(klt_hashmap* self, klt_str key) {
   assert(self);
   assert(key);
   unsigned int hash = 5381;
@@ -42,16 +42,16 @@ unsigned int HashMap_Hash(HashMap* self, String key) {
   }
   return hash % self->capacity;
 }
-void* HashMap_Get(HashMap* self, String key) {
+void* klt_hash_map_get(klt_hashmap* self, klt_str key) {
   assert(self);
   assert(key);
-  unsigned int index = HashMap_Hash(self, key);
+  unsigned int index = klt_hash_map_hash(self, key);
 
-  HashItem** itemPtr = (HashItem**)Vector_Get(self->itens, index);
-  HashItem* item = *itemPtr;
+  klt_hashitem** itemPtr = (klt_hashitem**)klt_vector_get(self->itens, index);
+  klt_hashitem* item = *itemPtr;
 
   while (item) {
-    if (String_Equals(item->key, key)) {
+    if (klt_str_equals(item->key, key)) {
       return item->value;
     }
     item = item->next;
@@ -59,24 +59,24 @@ void* HashMap_Get(HashMap* self, String key) {
   return NULL;
 }
 
-void HashMap_Put(HashMap* self, String key, void* value) {
+void klt_hash_map_put(klt_hashmap* self, klt_str key, void* value) {
   assert(self);
   assert(key);
 
-  unsigned int index = HashMap_Hash(self, key);
-  HashItem** headPtr = (HashItem**)Vector_Get(self->itens, index);
-  HashItem* head = *headPtr;
+  unsigned int index = klt_hash_map_hash(self, key);
+  klt_hashitem** headPtr = (klt_hashitem**)klt_vector_get(self->itens, index);
+  klt_hashitem* head = *headPtr;
 
-  HashItem* item = head;
+  klt_hashitem* item = head;
   while (item) {
-    if (String_Equals(item->key, key)) {
+    if (klt_str_equals(item->key, key)) {
       memcpy(item->value, value, self->itemSize);
       return;
     }
     item = item->next;
   }
 
-  HashItem* newItem = malloc(sizeof(HashItem));
+  klt_hashitem* newItem = malloc(sizeof(klt_hashitem));
   newItem->key = strdup(key);
   newItem->value = malloc(self->itemSize);
   memcpy(newItem->value, value, self->itemSize);

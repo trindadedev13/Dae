@@ -10,152 +10,155 @@
 #include "kilate/parser.h"
 #include "kilate/scope_stack.h"
 
-Interpreter* Interpreter_New(NodeVector* funcNodes,
-                             NodeVector* nativeFunctionsNodes) {
-  assert(funcNodes);
-  assert(nativeFunctionsNodes);
-  Interpreter* interpreter = malloc(sizeof(Interpreter));
-  interpreter->functions = HashMap_New(sizeof(Node*));
-  interpreter->nativeFunctions = HashMap_New(sizeof(NativeFunction));
+klt_interpreter* klt_interpreter_make(
+    klt_node_vector* funcklt_nodes,
+    klt_node_vector* nativeFunctionsklt_nodes) {
+  assert(funcklt_nodes);
+  assert(nativeFunctionsklt_nodes);
+  klt_interpreter* interpreter = malloc(sizeof(klt_interpreter));
+  interpreter->functions = klt_hash_map_make(sizeof(klt_node*));
+  interpreter->nativeFunctions = klt_hash_map_make(sizeof(klt_native_fn));
 
   // register all funcs
-  for (int i = 0; i < funcNodes->size; i++) {
-    Node** nodePtr = (Node**)Vector_Get(funcNodes, i);
+  for (int i = 0; i < funcklt_nodes->size; i++) {
+    klt_node** nodePtr = (klt_node**)klt_vector_get(funcklt_nodes, i);
     if (nodePtr != NULL) {
-      Node* node = *nodePtr;
+      klt_node* node = *nodePtr;
       if (node->type == NODE_FUNCTION) {
-        HashMap_Put(interpreter->functions, node->function_n.name, &node);
+        klt_hash_map_put(interpreter->functions, node->function_n.name, &node);
       }
     }
   }
 
-  for (int i = 0; i < nativeFunctionsNodes->size; i++) {
-    NativeFunctionEntry** entryPtr =
-        (NativeFunctionEntry**)Vector_Get(nativeFunctionsNodes, i);
+  for (int i = 0; i < nativeFunctionsklt_nodes->size; i++) {
+    klt_native_fnentry** entryPtr =
+        (klt_native_fnentry**)klt_vector_get(nativeFunctionsklt_nodes, i);
     if (entryPtr != NULL) {
-      NativeFunctionEntry* entry = *entryPtr;
-      HashMap_Put(interpreter->nativeFunctions, entry->name, &entry->fn);
+      klt_native_fnentry* entry = *entryPtr;
+      klt_hash_map_put(interpreter->nativeFunctions, entry->name, &entry->fn);
     }
   }
 
-  interpreter->varStack = ScopeStack_New();
+  interpreter->varStack = klt_scope_stack_make();
 
   return interpreter;
 }
 
-void Interpreter_Delete(Interpreter* self) {
-  HashMap_Delete(self->functions);
-  HashMap_Delete(self->nativeFunctions);
-  ScopeStack_Delete(self->varStack);
+void klt_interpreter_delete(klt_interpreter* self) {
+  klt_hash_map_delete(self->functions);
+  klt_hash_map_delete(self->nativeFunctions);
+  klt_scope_stack_delete(self->varStack);
   free(self);
 }
 
-InterpreterResult Interpreter_Run(Interpreter* self) {
+klt_interpreter_result klt_interpreter_run(klt_interpreter* self) {
   assert(self);
 
-  Node** mainPtr = (Node**)HashMap_Get(self->functions, "main");
+  klt_node** mainPtr = (klt_node**)klt_hash_map_get(self->functions, "main");
   if (mainPtr == NULL) {
-    Error_Fatal("Your program needs a main function!");
+    klt_error_fatal("Your program needs a main function!");
   }
-  Node* main = *mainPtr;
+  klt_node* main = *mainPtr;
 
   if (main->function_n.returnType == NULL ||
-      !String_Equals(main->function_n.returnType, "bool")) {
-    Error_Fatal("Main function should return bool.");
+      !klt_str_equals(main->function_n.returnType, "bool")) {
+    klt_error_fatal("Main function should return bool.");
   }
 
-  return Interpreter_RunFunc(self, main, NULL);
+  return klt_interpreter_run_fn(self, main, NULL);
 }
 
-InterpreterResult Interpreter_RunFunc(Interpreter* self,
-                                      Node* func,
-                                      NodeFuncParamVector* params) {
+klt_interpreter_result klt_interpreter_run_fn(klt_interpreter* self,
+                                              klt_node* func,
+                                              klt_node_fnparam_vector* params) {
   assert(self);
   assert(func);
   assert(func->type == NODE_FUNCTION);
 
-  ScopeStack_Push(self->varStack);
+  klt_scope_stack_push(self->varStack);
 
   if (params != NULL && func->function_n.params != NULL) {
     for (int i = 0; i < params->size; i++) {
-      NodeFunctionParam* param = *(NodeFunctionParam**)Vector_Get(params, i);
-      NodeFunctionParam* fnParam =
-          *(NodeFunctionParam**)Vector_Get(func->function_n.params, i);
+      klt_node_fnparam* param = *(klt_node_fnparam**)klt_vector_get(params, i);
+      klt_node_fnparam* fnParam =
+          *(klt_node_fnparam**)klt_vector_get(func->function_n.params, i);
 
-      NodeValueType actualType = param->type;
+      klt_node_valuetype actualType = param->type;
       void* actualValue = param->value;
 
       if (param->type == NODE_VALUE_TYPE_VAR) {
-        Node* realVar = ScopeStack_Get(self->varStack, (String)param->value);
+        klt_node* realVar =
+            klt_scope_stack_get(self->varStack, (klt_str)param->value);
         if (realVar == NULL) {
-          Error_Fatal("Variable not defined: %s", (String)param->value);
+          klt_error_fatal("Variable not defined: %s", (klt_str)param->value);
         }
-        actualType = Parser_StringToNodeValueType(realVar->vardec_n.varType);
+        actualType = klt_parser_str_to_nodevaluetype(realVar->vardec_n.varType);
         actualValue = realVar->vardec_n.varValue;
       }
 
       if (fnParam->type != NODE_VALUE_TYPE_ANY && fnParam->type != actualType) {
-        Error_Fatal(
+        klt_error_fatal(
             "Argument %d to function '%s' expected type '%s', but got '%s'",
             i + 1, func->function_n.name,
-            Parser_NodeValueTypeToString(fnParam->type),
-            Parser_NodeValueTypeToString(actualType));
+            klt_parser_nodevaluetype_to_str(fnParam->type),
+            klt_parser_nodevaluetype_to_str(actualType));
       }
 
-      Node* var = VarDecNode_New(fnParam->value,
-                                 Parser_NodeValueTypeToString(fnParam->type),
-                                 actualType, actualValue);
-      ScopeStack_Set(self->varStack, var->vardec_n.varName, var);
+      klt_node* var = klt_var_dec_node_make(
+          fnParam->value, klt_parser_nodevaluetype_to_str(fnParam->type),
+          actualType, actualValue);
+      klt_scope_stack_set(self->varStack, var->vardec_n.varName, var);
     }
   }
 
   for (int i = 0; i < func->function_n.body->size; i++) {
-    Node** stmtPtr = (Node**)Vector_Get(func->function_n.body, i);
+    klt_node** stmtPtr = (klt_node**)klt_vector_get(func->function_n.body, i);
     if (stmtPtr != NULL) {
-      Node* stmt = *stmtPtr;
-      InterpreterResult result = Interpreter_RunNode(self, stmt);
+      klt_node* stmt = *stmtPtr;
+      klt_interpreter_result result = klt_interpreter_run_node(self, stmt);
       if (result.type == IRT_RETURN) {
         // Error Here
-        // ScopeStack_Pop(self->varStack);
+        // klt_scope_stack_pop(self->varStack);
         return result;
       }
     }
   }
 
-  ScopeStack_Pop(self->varStack);
+  klt_scope_stack_pop(self->varStack);
 
   // default value
-  return (InterpreterResult){.type = IRT_FUNC, .data = NULL};
+  return (klt_interpreter_result){.type = IRT_FUNC, .data = NULL};
 }
 
-InterpreterResult Interpreter_RunNode(Interpreter* self, Node* node) {
+klt_interpreter_result klt_interpreter_run_node(klt_interpreter* self,
+                                                klt_node* node) {
   assert(self);
   assert(node);
 
   switch (node->type) {
     case NODE_CALL: {
-      Node** calledPtr =
-          (Node**)HashMap_Get(self->functions, node->call_n.functionName);
-      NativeFunction* nativeFnPtr = (NativeFunction*)HashMap_Get(
+      klt_node** calledPtr = (klt_node**)klt_hash_map_get(
+          self->functions, node->call_n.functionName);
+      klt_native_fn* nativeFnPtr = (klt_native_fn*)klt_hash_map_get(
           self->nativeFunctions, node->call_n.functionName);
 
       if (calledPtr != NULL) {
-        Node* called = *calledPtr;
-        InterpreterResult result =
-            Interpreter_RunFunc(self, called, node->call_n.functionParams);
+        klt_node* called = *calledPtr;
+        klt_interpreter_result result =
+            klt_interpreter_run_fn(self, called, node->call_n.functionParams);
         return result;
       } else if (nativeFnPtr != NULL) {
-        NativeFnData* nativeFnData = malloc(sizeof(NativeFnData));
+        klt_native_fndata* nativeFnData = malloc(sizeof(klt_native_fndata));
         nativeFnData->params = node->call_n.functionParams;
         nativeFnData->varStack = self->varStack;
 
-        NativeFunction nativeFn = *nativeFnPtr;
-        Node* nativeFnResult = nativeFn(nativeFnData);
-        InterpreterResult result =
-            (InterpreterResult){.data = nativeFnResult, .type = IRT_FUNC};
+        klt_native_fn nativeFn = *nativeFnPtr;
+        klt_node* nativeFnResult = nativeFn(nativeFnData);
+        klt_interpreter_result result =
+            (klt_interpreter_result){.data = nativeFnResult, .type = IRT_FUNC};
         return result;
       } else {
-        Error_Fatal("Function not found: %s", node->call_n.functionName);
+        klt_error_fatal("Function not found: %s", node->call_n.functionName);
       }
     }
 
@@ -164,19 +167,19 @@ InterpreterResult Interpreter_RunNode(Interpreter* self, Node* node) {
       if (node->return_n.returnValue != NULL) {
         value = node->return_n.returnValue;  // or evaluate this node if needed
       }
-      return (InterpreterResult){.type = IRT_RETURN, .data = value};
+      return (klt_interpreter_result){.type = IRT_RETURN, .data = value};
     }
 
     case NODE_VARDEC: {
       /*printf("[DEBUG] Declaring variable '%s' of type '%s' with value '%s'\n",
              node->vardec_n.varName, node->vardec_n.varType,
-             (String)node->vardec_n.varValue);*/
-      ScopeStack_Set(self->varStack, node->vardec_n.varName, node);
-      return (InterpreterResult){.type = IRT_FUNC, .data = NULL};
+             (klt_str)node->vardec_n.varValue);*/
+      klt_scope_stack_set(self->varStack, node->vardec_n.varName, node);
+      return (klt_interpreter_result){.type = IRT_FUNC, .data = NULL};
     }
 
     default:
-      Error_Fatal("Unknown node type %d", node->type);
+      klt_error_fatal("Unknown node type %d", node->type);
   }
-  return (InterpreterResult){.type = IRT_FUNC, .data = NULL};
+  return (klt_interpreter_result){.type = IRT_FUNC, .data = NULL};
 }

@@ -1,34 +1,34 @@
-#ifndef HASHMAP_H
-#define HASHMAP_H
+#ifndef __HASHMAP_H__
+#define __HASHMAP_H__
 
 #include <stdio.h>
 
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
-typedef Vector HashMapVector;
-typedef Vector HashItemVector;
+typedef klt_vector klt_hashmap_vector;
+typedef klt_vector klt_hashitem_vector;
 
 typedef struct {
-  HashItemVector* itens;
+  klt_hashitem_vector* itens;
   size_t itemSize;
   size_t capacity;
-} HashMap;
+} klt_hashmap;
 
 typedef struct {
-  String key;
+  klt_str key;
   void* value;
   void* next;
-} HashItem;
+} klt_hashitem;
 
-HashMap* HashMap_New(size_t);
+klt_hashmap* klt_hash_map_make(size_t);
 
-void HashMap_Delete(HashMap*);
+void klt_hash_map_delete(klt_hashmap*);
 
-unsigned int HashMap_Hash(HashMap*, String);
+unsigned int klt_hash_map_hash(klt_hashmap*, klt_str);
 
-void* HashMap_Get(HashMap*, String);
+void* klt_hash_map_get(klt_hashmap*, klt_str);
 
-void HashMap_Put(HashMap*, String, void*);
+void klt_hash_map_put(klt_hashmap*, klt_str, void*);
 
 #endif

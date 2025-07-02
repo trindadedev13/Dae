@@ -8,49 +8,49 @@
 
 // Opens a file
 // After do all uses with file, close it
-// with File_Close
-File* File_Open(String filePath, String mode) {
-  File* file = malloc(sizeof(File));
+// with klt_file_close
+klt_file* klt_file_open(klt_str filePath, klt_str mode) {
+  klt_file* file = malloc(sizeof(klt_file));
   if (file == NULL) {
-    Error_Fatal("Failed to open %s", filePath);
+    klt_error_fatal("Failed to open %s", filePath);
     return NULL;
   }
-  file->stdFile = fopen(filePath, mode);
-  if (file->stdFile == NULL) {
-    Error_Fatal("Failed to open %s", filePath);
+  file->std_file = fopen(filePath, mode);
+  if (file->std_file == NULL) {
+    klt_error_fatal("Failed to open %s", filePath);
     return NULL;
   }
   file->path = filePath;
   return file;
 }
 
-void File_Close(File* file) {
-  fclose(file->stdFile);
+void klt_file_close(klt_file* file) {
+  fclose(file->std_file);
   free(file);
 }
 
-// Returns the length of File content.
-size_t File_GetLength(File* file) {
-  fseek(file->stdFile, 0, SEEK_END);
-  size_t len = ftell(file->stdFile);
-  rewind(file->stdFile);
+// Returns the length of klt_file content.
+size_t klt_file_get_length(klt_file* file) {
+  fseek(file->std_file, 0, SEEK_END);
+  size_t len = ftell(file->std_file);
+  rewind(file->std_file);
   return len;
 }
 
-// Reads the content of File.
+// Reads the content of klt_file.
 // Result should be free.
-String File_ReadText(File* file) {
-  if (file == NULL || file->stdFile == NULL) {
-    Error_Fatal("Failed to allocate memory to open file.");
+klt_str klt_file_read_text(klt_file* file) {
+  if (file == NULL || file->std_file == NULL) {
+    klt_error_fatal("Failed to allocate memory to open file.");
     return NULL;
   }
-  size_t fileLen = File_GetLength(file);
-  String buffer = malloc(fileLen + 1);  // 1 for null-terminate
+  size_t fileLen = klt_file_get_length(file);
+  klt_str buffer = malloc(fileLen + 1);  // 1 for null-terminate
   if (buffer == NULL) {
-    Error_Fatal("Failed to allocate memory to read file %s", file->path);
+    klt_error_fatal("Failed to allocate memory to read file %s", file->path);
     return NULL;
   }
-  fread(buffer, 1, fileLen, file->stdFile);  // read file into buffer
-  buffer[fileLen] = '\0';                    // null-terminate.
+  fread(buffer, 1, fileLen, file->std_file);  // read file into buffer
+  buffer[fileLen] = '\0';                     // null-terminate.
   return buffer;
 }

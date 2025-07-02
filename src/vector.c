@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-Vector* Vector_New(size_t itemSize) {
-  Vector* self = malloc(sizeof(Vector));
+klt_vector* klt_vector_make(size_t itemSize) {
+  klt_vector* self = malloc(sizeof(klt_vector));
   assert(itemSize);
   if (self == NULL) {
     printf("Failed to create vector, Out Of Memory.\n");
@@ -19,20 +19,20 @@ Vector* Vector_New(size_t itemSize) {
   return self;
 }
 
-void Vector_Delete(Vector* self) {
+void klt_vector_delete(klt_vector* self) {
   assert(self);
   free(self->data);
   free(self);
 }
 
-const void* Vector_Get(Vector* self, size_t index) {
+const void* klt_vector_get(klt_vector* self, size_t index) {
   assert(self);
   assert(index < self->size);
 
   return (char*)(self->data) + index * self->itemSize;
 }
 
-void Vector_Reserve(Vector* self, const size_t size) {
+void klt_vector_reserve(klt_vector* self, const size_t size) {
   assert(self);
   if (self->capacity <= size) {
     self->data = realloc(self->data, size * self->itemSize);
@@ -42,33 +42,33 @@ void Vector_Reserve(Vector* self, const size_t size) {
   }
 }
 
-void Vector_Set(Vector* self, size_t index, const void* item) {
+void klt_vector_set(klt_vector* self, size_t index, const void* item) {
   assert(self);
   assert(index < self->size);
 
   memcpy((char*)self->data + index * self->itemSize, item, self->itemSize);
 }
 
-void Vector_Insert(Vector* self, size_t index, const void* item) {
+void klt_vector_insert(klt_vector* self, size_t index, const void* item) {
   assert(self);
   assert(index <= self->size);
 
   if (self->capacity <= self->size) {
-    Vector_Reserve(self, 2 * self->capacity);
+    klt_vector_reserve(self, 2 * self->capacity);
   }
   memmove((char*)self->data + (index + 1) * self->itemSize,
           (char*)self->data + index * self->itemSize,
           (self->size - index) * self->itemSize);
 
   self->size++;
-  Vector_Set(self, index, item);
+  klt_vector_set(self, index, item);
 }
 
-void Vector_PushBack(Vector* self, const void* item) {
-  Vector_Insert(self, self->size, item);
+void klt_vector_push_back(klt_vector* self, const void* item) {
+  klt_vector_insert(self, self->size, item);
 }
 
-void Vector_Remove(Vector* self, size_t index) {
+void klt_vector_remove(klt_vector* self, size_t index) {
   assert(self);
   assert(index < self->size);
   if (index < self->size - 1) {

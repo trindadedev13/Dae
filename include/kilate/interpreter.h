@@ -1,5 +1,5 @@
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#ifndef __INTERPRETER_H__
+#define __INTERPRETER_H__
 
 #include "kilate/hashmap.h"
 #include "kilate/node.h"
@@ -8,26 +8,28 @@
 #include "kilate/vector.h"
 
 typedef struct {
-  HashMap* functions;
-  HashMap* nativeFunctions;
-  ScopeStack* varStack;
-} Interpreter;
+  klt_hashmap* functions;
+  klt_hashmap* nativeFunctions;
+  klt_scope_stack* varStack;
+} klt_interpreter;
 
-typedef enum { IRT_FUNC, IRT_RETURN } InterpreterResultType;
+typedef enum { IRT_FUNC, IRT_RETURN } klt_interpreter_result_type;
 
 typedef struct {
   void* data;
-  InterpreterResultType type;
-} InterpreterResult;
+  klt_interpreter_result_type type;
+} klt_interpreter_result;
 
-Interpreter* Interpreter_New(NodeVector*, NodeVector*);
+klt_interpreter* klt_interpreter_make(klt_node_vector*, klt_node_vector*);
 
-void Interpreter_Delete(Interpreter*);
+void klt_interpreter_delete(klt_interpreter*);
 
-InterpreterResult Interpreter_Run(Interpreter*);
+klt_interpreter_result klt_interpreter_run(klt_interpreter*);
 
-InterpreterResult Interpreter_RunFunc(Interpreter*, Node*, StringVector*);
+klt_interpreter_result klt_interpreter_run_fn(klt_interpreter*,
+                                              klt_node*,
+                                              klt_str_vector*);
 
-InterpreterResult Interpreter_RunNode(Interpreter*, Node*);
+klt_interpreter_result klt_interpreter_run_node(klt_interpreter*, klt_node*);
 
 #endif

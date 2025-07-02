@@ -6,23 +6,22 @@
 #include <string.h>
 
 #include "kilate/lexer.h"
+#include "kilate/native.h"
 #include "kilate/node.h"
-#include "kilate/parser_native_funcs.h"
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
-Parser* Parser_New(TokenVector* tokens) {
-  Parser* parser = malloc(sizeof(Parser));
+klt_parser* klt_parser_make(klt_token_vector* tokens) {
+  klt_parser* parser = malloc(sizeof(klt_parser));
   parser->tokens = tokens;
-  parser->functions = Vector_New(sizeof(Node*));
-  parser->nativeFunctions = Vector_New(sizeof(NativeFunctionEntry*));
+  parser->functions = klt_vector_make(sizeof(klt_node*));
   parser->__pos__ = 0;
   return parser;
 }
 
-void Parser_Delete(Parser* parser) {
+void klt_parser_delete(klt_parser* parser) {
   for (size_t i = 0; i < parser->functions->size; ++i) {
-    Node* node = *(Node**)Vector_Get(parser->functions, i);
+    klt_node* node = *(klt_node**)klt_vector_get(parser->functions, i);
     // Of course its function node, but its good to check
     if (node->type == NODE_FUNCTION) {
       free(node->function_n.name);
@@ -31,119 +30,73 @@ void Parser_Delete(Parser* parser) {
       }
       // free body nodes
       for (size_t j = 0; j < node->function_n.body->size; ++j) {
-        Node** bodyNodePtr = (Node**)Vector_Get(node->function_n.body, j);
-        if (bodyNodePtr != NULL) {
-          Node* bodyNode = *bodyNodePtr;
-          if (bodyNode->type == NODE_CALL) {
-            free(bodyNode->call_n.functionName);
-            Parser_DeleteParams(bodyNode->call_n.functionParams);
-          } else if (bodyNode->type == NODE_VARDEC) {
-            free(bodyNode->vardec_n.varName);
-            free(bodyNode->vardec_n.varType);
+        klt_node** bodyklt_nodePtr =
+            (klt_node**)klt_vector_get(node->function_n.body, j);
+        if (bodyklt_nodePtr != NULL) {
+          klt_node* bodyklt_node = *bodyklt_nodePtr;
+          if (bodyklt_node->type == NODE_CALL) {
+            free(bodyklt_node->call_n.functionName);
+            klt_parser_delete_params(bodyklt_node->call_n.functionParams);
+          } else if (bodyklt_node->type == NODE_VARDEC) {
+            free(bodyklt_node->vardec_n.varName);
+            free(bodyklt_node->vardec_n.varType);
           }
-          free(bodyNode);
+          free(bodyklt_node);
         }
       }
-      Vector_Delete(node->function_n.body);
+      klt_vector_delete(node->function_n.body);
       // free param nodes
       for (size_t j = 0; j < node->function_n.params->size; ++j) {
-        NodeFunctionParam* param =
-            *(NodeFunctionParam**)Vector_Get(node->function_n.params, j);
+        klt_node_fnparam* param =
+            *(klt_node_fnparam**)klt_vector_get(node->function_n.params, j);
         free(param->value);
         // free(param->typeStr);
         free(param);
       }
-      Vector_Delete(node->function_n.params);
+      klt_vector_delete(node->function_n.params);
     }
     free(node);
   }
-  for (size_t i = 0; i < parser->nativeFunctions->size; ++i) {
-    NativeFunctionEntry* entry =
-        *(NativeFunctionEntry**)Vector_Get(parser->nativeFunctions, i);
-    free(entry->name);
-    Vector_Delete(entry->requiredParams);
-    free(entry);
-  }
-  Vector_Delete(parser->functions);
-  Vector_Delete(parser->nativeFunctions);
+  klt_vector_delete(parser->functions);
   free(parser);
 }
 
-void Parser_DeleteParams(NodeFuncParamVector* params) {
+void klt_parser_delete_params(klt_node_fnparam_vector* params) {
   if (params == NULL)
     return;
   for (size_t i = 0; i < params->size; ++i) {
-    NodeFunctionParam* param = *(NodeFunctionParam**)Vector_Get(params, i);
+    klt_node_fnparam* param = *(klt_node_fnparam**)klt_vector_get(params, i);
     free(param->value);
     // free(param->typeStr);
     free(param);
   }
-  Vector_Delete(params);
+  klt_vector_delete(params);
 }
 
-Token* Parser_Consume(Parser* parser, TokenType exType) {
-  Token* token = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+klt_token* klt_parser_consume(klt_parser* parser, klt_token_type exType) {
+  klt_token* token =
+      *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
   if (token->type != exType) {
-    Parser_Error(token, "Expected %s, but got %s", Token_GetTypeName(exType),
-                 Token_GetTypeName(token->type));
+    klt_parser_error(token, "Expected %s, but got %s",
+                     klt_tokentype_tostr(exType),
+                     klt_tokentype_tostr(token->type));
     return NULL;
   }
   parser->__pos__++;
   return token;
 }
 
-Node* Parser_FindFunction(Parser* parser, String name) {
+klt_node* klt_parser_find_function(klt_parser* parser, klt_str name) {
   for (size_t i = 0; i < parser->functions->size; i++) {
-    Node* fn = *(Node**)Vector_Get(parser->functions, i);
-    if (String_Equals(fn->function_n.name, name)) {
+    klt_node* fn = *(klt_node**)klt_vector_get(parser->functions, i);
+    if (klt_str_equals(fn->function_n.name, name)) {
       return fn;
     }
   }
   return NULL;
 }
 
-void Parser_Native_RegisterFunction(Parser* parser,
-                                    String name,
-                                    StringVector* requiredParams,
-                                    NativeFunction fn) {
-  NativeFunctionEntry* entry = malloc(sizeof(NativeFunctionEntry));
-  entry->name = strdup(name);
-  entry->fn = fn;
-  entry->requiredParams = requiredParams;
-  Vector_PushBack(parser->nativeFunctions, &entry);
-}
-
-NativeFunctionEntry* Parser_Native_FindFunction(Parser* parser, String name) {
-  for (size_t i = 0; i < parser->nativeFunctions->size; ++i) {
-    NativeFunctionEntry* entry =
-        *(NativeFunctionEntry**)Vector_Get(parser->nativeFunctions, i);
-    if (String_Equals(entry->name, name)) {
-      return entry;
-    }
-  }
-  return NULL;
-}
-
-void Parser_Native_RegisterAllFunctions(Parser* parser) {
-  {
-    // Register native print method
-    StringVector* requiredParams = Vector_New(sizeof(String*));
-    String any = "any";
-    Vector_PushBack(requiredParams, &any);
-    Parser_Native_RegisterFunction(parser, "print", requiredParams,
-                                   Parser_Native_Print);
-  }
-  {
-    // Register native system method
-    StringVector* requiredParams = Vector_New(sizeof(String*));
-    String str = "string";
-    Vector_PushBack(requiredParams, &str);
-    Parser_Native_RegisterFunction(parser, "system", requiredParams,
-                                   Parser_Native_System);
-  }
-}
-
-String Parser_TokenTypeToString(TokenType type) {
+klt_str klt_parser_tokentype_to_str(klt_token_type type) {
   switch (type) {
     case TOKEN_STRING:
       return "string";
@@ -156,7 +109,7 @@ String Parser_TokenTypeToString(TokenType type) {
   }
 }
 
-String Parser_NodeValueTypeToString(NodeValueType type) {
+klt_str klt_parser_nodevaluetype_to_str(klt_node_valuetype type) {
   switch (type) {
     case NODE_VALUE_TYPE_NUMBER:
       return "number";
@@ -173,7 +126,8 @@ String Parser_NodeValueTypeToString(NodeValueType type) {
   }
 }
 
-NodeValueType Parser_TokenTypeToNodeValueType(Parser* parser, Token* tk) {
+klt_node_valuetype klt_parser_tokentype_to_nodevaluetype(klt_parser* parser,
+                                                         klt_token* tk) {
   switch (tk->type) {
     case TOKEN_STRING:
       return NODE_VALUE_TYPE_STRING;
@@ -182,7 +136,8 @@ NodeValueType Parser_TokenTypeToNodeValueType(Parser* parser, Token* tk) {
     case TOKEN_NUMBER:
       return NODE_VALUE_TYPE_NUMBER;
     case TOKEN_IDENTIFIER: {
-      Token* next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+      klt_token* next =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
       if (next->type == TOKEN_LPAREN) {
         return NODE_VALUE_TYPE_FUNC;
       } else {
@@ -190,7 +145,7 @@ NodeValueType Parser_TokenTypeToNodeValueType(Parser* parser, Token* tk) {
       }
     }
     case TOKEN_TYPE: {
-      if (String_Equals(tk->text, "any")) {
+      if (klt_str_equals(tk->text, "any")) {
         return NODE_VALUE_TYPE_ANY;
       }
     }
@@ -199,9 +154,9 @@ NodeValueType Parser_TokenTypeToNodeValueType(Parser* parser, Token* tk) {
   }
 }
 
-NodeValueType Parser_StringToNodeValueType(String value) {
+klt_node_valuetype klt_parser_str_to_nodevaluetype(klt_str value) {
 #ifndef ct
-#define ct(str) String_Equals(value, str)
+#define ct(str) klt_str_equals(value, str)
 #endif
 
   if (ct("string")) {
@@ -219,31 +174,34 @@ NodeValueType Parser_StringToNodeValueType(String value) {
 #endif
 }
 
-Node* Parser_ParseStatement(Parser* parser) {
-  Token* token = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
-  if (String_Equals(token->text, "return")) {
-    Parser_Consume(parser, TOKEN_KEYWORD);
-    Parser_Consume(parser, TOKEN_ARROW);
-    Token* next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+klt_node* klt_parser_parse_statement(klt_parser* parser) {
+  klt_token* token =
+      *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+  if (klt_str_equals(token->text, "return")) {
+    klt_parser_consume(parser, TOKEN_KEYWORD);
+    klt_parser_consume(parser, TOKEN_ARROW);
+    klt_token* next =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
     void* value;
-    NodeValueType type;
+    klt_node_valuetype type;
     if (next->type == TOKEN_BOOL) {
       bool rawBool = false;
-      String boolStr = Parser_Consume(parser, TOKEN_BOOL)->text;
-      if (String_Equals(boolStr, "true"))
+      klt_str boolStr = klt_parser_consume(parser, TOKEN_BOOL)->text;
+      if (klt_str_equals(boolStr, "true"))
         rawBool = true;
       value = (void*)(intptr_t)rawBool;
       type = NODE_VALUE_TYPE_BOOL;
     } else if (next->type == TOKEN_NUMBER) {
-      value = (void*)(intptr_t)String_ToInt(
-          Parser_Consume(parser, TOKEN_NUMBER)->text);
+      value = (void*)(intptr_t)klt_str_to_int(
+          klt_parser_consume(parser, TOKEN_NUMBER)->text);
       type = NODE_VALUE_TYPE_NUMBER;
     } else if (next->type == TOKEN_STRING) {
-      value = Parser_Consume(parser, TOKEN_STRING)->text;
+      value = klt_parser_consume(parser, TOKEN_STRING)->text;
       type = NODE_VALUE_TYPE_STRING;
     } else if (next->type == TOKEN_IDENTIFIER) {
-      String name = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
-      Token* next2 = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+      klt_str name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
+      klt_token* next2 =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
       value = name;
       if (next2->type == TOKEN_LPAREN) {
         type = NODE_VALUE_TYPE_FUNC;
@@ -252,77 +210,82 @@ Node* Parser_ParseStatement(Parser* parser) {
       }
       parser->__pos__ += 2;
     } else {
-      Parser_Error(next, "Unsupported value in typed return statement.");
+      klt_parser_error(next, "Unsupported value in typed return statement.");
       return NULL;
     }
-    return ReturnNode_New(type, value);
+    return klt_return_node_make(type, value);
   } else if (token->type == TOKEN_VAR || token->type == TOKEN_LET) {
     parser->__pos__++;
-    String varName = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
-    Parser_Consume(parser, TOKEN_ASSIGN);
-    Token* varValueTk = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+    klt_str varName = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
+    klt_parser_consume(parser, TOKEN_ASSIGN);
+    klt_token* varValueTk =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
-    NodeValueType varValueType;
-    String varInferredType;
+    klt_node_valuetype varValueType;
+    klt_str varInferredType;
     void* varValue;
 
     if (varValueTk->type == TOKEN_STRING) {
-      varValue = Parser_Consume(parser, TOKEN_STRING)->text;
+      varValue = klt_parser_consume(parser, TOKEN_STRING)->text;
       varValueType = NODE_VALUE_TYPE_STRING;
-      varInferredType = Parser_NodeValueTypeToString(varValueType);
+      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
     } else if (varValueTk->type == TOKEN_NUMBER) {
-      int temp = String_ToInt(Parser_Consume(parser, TOKEN_NUMBER)->text);
+      int temp = klt_str_to_int(klt_parser_consume(parser, TOKEN_NUMBER)->text);
       varValue = (void*)(intptr_t)temp;
       varValueType = NODE_VALUE_TYPE_NUMBER;
-      varInferredType = Parser_NodeValueTypeToString(varValueType);
+      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
     } else if (varValueTk->type == TOKEN_BOOL) {
       bool rawBool = false;
-      String boolStr = Parser_Consume(parser, TOKEN_BOOL)->text;
-      if (String_Equals(boolStr, "true"))
+      klt_str boolStr = klt_parser_consume(parser, TOKEN_BOOL)->text;
+      if (klt_str_equals(boolStr, "true"))
         rawBool = true;
       varValue = (void*)(intptr_t)rawBool;
       varValueType = NODE_VALUE_TYPE_BOOL;
-      varInferredType = Parser_NodeValueTypeToString(varValueType);
+      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
     } else if (varValueTk->type == TOKEN_IDENTIFIER) {
-      varValue = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
-      Token* next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+      varValue = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
+      klt_token* next =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
       if (next->type == TOKEN_LPAREN) {
         varValueType = NODE_VALUE_TYPE_FUNC;
       } else {
         varValueType = NODE_VALUE_TYPE_VAR;
       }
-      varInferredType = Parser_NodeValueTypeToString(varValueType);
+      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
       parser->__pos__ += 2;
     }
-    return VarDecNode_New(varName, varInferredType, varValueType, varValue);
+    return klt_var_dec_node_make(varName, varInferredType, varValueType,
+                                 varValue);
   } else if (token->type == TOKEN_TYPE) {
-    String varType = Parser_Consume(parser, TOKEN_TYPE)->text;
-    String varName = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
-    Parser_Consume(parser, TOKEN_ASSIGN);
-    Token* valueTk = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+    klt_str varType = klt_parser_consume(parser, TOKEN_TYPE)->text;
+    klt_str varName = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
+    klt_parser_consume(parser, TOKEN_ASSIGN);
+    klt_token* valueTk =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
-    NodeValueType varValueType;
+    klt_node_valuetype varValueType;
     void* varValue;
 
     if (valueTk->type == TOKEN_STRING) {
-      valueTk = Parser_Consume(parser, TOKEN_STRING);
+      valueTk = klt_parser_consume(parser, TOKEN_STRING);
       varValue = valueTk->text;
       varValueType = NODE_VALUE_TYPE_STRING;
     } else if (valueTk->type == TOKEN_NUMBER) {
-      valueTk = Parser_Consume(parser, TOKEN_NUMBER);
-      int temp = String_ToInt(valueTk->text);
+      valueTk = klt_parser_consume(parser, TOKEN_NUMBER);
+      int temp = klt_str_to_int(valueTk->text);
       varValue = (void*)(intptr_t)temp;
       varValueType = NODE_VALUE_TYPE_NUMBER;
     } else if (valueTk->type == TOKEN_BOOL) {
-      valueTk = Parser_Consume(parser, TOKEN_BOOL);
-      String boolStr = valueTk->text;
-      bool bval = String_Equals(boolStr, "true");
+      valueTk = klt_parser_consume(parser, TOKEN_BOOL);
+      klt_str boolStr = valueTk->text;
+      bool bval = klt_str_equals(boolStr, "true");
       varValue = (void*)(intptr_t)bval;
       varValueType = NODE_VALUE_TYPE_BOOL;
     } else if (valueTk->type == TOKEN_IDENTIFIER) {
-      valueTk = Parser_Consume(parser, TOKEN_NUMBER);
-      String name = valueTk->text;
-      Token* next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+      valueTk = klt_parser_consume(parser, TOKEN_NUMBER);
+      klt_str name = valueTk->text;
+      klt_token* next =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
       varValue = name;
       if (next->type == TOKEN_LPAREN) {
         varValueType = NODE_VALUE_TYPE_FUNC;
@@ -331,227 +294,238 @@ Node* Parser_ParseStatement(Parser* parser) {
       }
       parser->__pos__ += 2;
     } else {
-      Parser_Error(valueTk, "Unsupported value in typed variable declaration.");
+      klt_parser_error(valueTk,
+                       "Unsupported value in typed variable declaration.");
       return NULL;
     }
 
-    String expected = varType;
-    String actual = Parser_TokenTypeToString(valueTk->type);
-    if (!String_Equals(expected, "any") && !String_Equals(expected, actual)) {
-      Parser_Error(
+    klt_str expected = varType;
+    klt_str actual = klt_parser_tokentype_to_str(valueTk->type);
+    if (!klt_str_equals(expected, "any") && !klt_str_equals(expected, actual)) {
+      klt_parser_error(
           valueTk,
           "Type mismatch in declaration of '%s': expected '%s', got '%s'",
           varName, expected, actual);
     }
 
-    return VarDecNode_New(varName, varType, varValueType, varValue);
+    return klt_var_dec_node_make(varName, varType, varValueType, varValue);
   } else if (token->type == TOKEN_IDENTIFIER) {
-    String name = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
-    Token* next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+    klt_str name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
+    klt_token* next =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
     // call with () no params
     if (next->type == TOKEN_LPAREN) {
-      Parser_Consume(parser, TOKEN_LPAREN);
-      Parser_Consume(parser, TOKEN_RPAREN);
+      klt_parser_consume(parser, TOKEN_LPAREN);
+      klt_parser_consume(parser, TOKEN_RPAREN);
 
-      Node* fn = Parser_FindFunction(parser, name);
+      klt_node* fn = klt_parser_find_function(parser, name);
       if (fn != NULL) {
         size_t expected = fn->function_n.params->size;
         if (expected > 0) {
-          Parser_Error(
+          klt_parser_error(
               next,
               "Function '%s' expects %zu parameters but none were provided.",
               name, expected);
         }
       } else {
-        NativeFunctionEntry* nativeFn =
-            Parser_Native_FindFunction(parser, name);
+        klt_native_fnentry* nativeFn = klt_native_find_function(name);
         if (nativeFn != NULL) {
-          if (nativeFn->requiredParams->size > 0) {
-            Parser_Error(next,
-                         "Native function '%s' expects %zu parameters but none "
-                         "were provided.",
-                         name, nativeFn->requiredParams->size);
+          if (nativeFn->requiredParams != NULL &&
+              nativeFn->requiredParams->size > 0) {
+            klt_parser_error(
+                next,
+                "Native function '%s' expects %zu parameters but none "
+                "were provided.",
+                name, nativeFn->requiredParams->size);
           }
         } else {
-          Parser_Error(
+          klt_parser_error(
               token,
               "Function '%s' is not declared and is not a native function.",
               name);
         }
       }
 
-      return CallNode_New(name, NULL);
+      return klt_call_node_make(name, NULL);
     }
 
     // call with ->
     if (next->type == TOKEN_ARROW) {
-      Parser_Consume(parser, TOKEN_ARROW);
-      NodeFuncParamVector* params = Vector_New(sizeof(NodeFuncParamVector*));
+      klt_parser_consume(parser, TOKEN_ARROW);
+      klt_node_fnparam_vector* params =
+          klt_vector_make(sizeof(klt_node_fnparam_vector*));
 
       while (true) {
-        Token* param = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+        klt_token* param =
+            *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
         if (param->type != TOKEN_STRING && param->type != TOKEN_BOOL &&
             param->type != TOKEN_NUMBER && param->type != TOKEN_IDENTIFIER) {
           break;
         }
 
-        NodeFunctionParam* fnParam = malloc(sizeof(NodeFunctionParam));
+        klt_node_fnparam* fnParam = malloc(sizeof(klt_node_fnparam));
         fnParam->value = strdup(param->text);
-        fnParam->type = Parser_TokenTypeToNodeValueType(parser, param);
-        // fnParam->typeStr = strdup(Token_GetTypeName(param->type));
-        Vector_PushBack(params, &fnParam);
+        fnParam->type = klt_parser_tokentype_to_nodevaluetype(parser, param);
+        // fnParam->typeStr = strdup(klt_tokentype_tostr(param->type));
+        klt_vector_push_back(params, &fnParam);
 
-        Parser_Consume(parser, param->type);
+        klt_parser_consume(parser, param->type);
 
-        Token* comma = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+        klt_token* comma =
+            *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
         if (comma->type == TOKEN_COMMA) {
-          Parser_Consume(parser, TOKEN_COMMA);
+          klt_parser_consume(parser, TOKEN_COMMA);
         } else {
           break;
         }
       }
 
-      Node* fn = Parser_FindFunction(parser, name);
+      klt_node* fn = klt_parser_find_function(parser, name);
       if (fn != NULL) {
         size_t expected = fn->function_n.params->size;
         if (params->size != expected) {
-          Parser_Error(next,
-                       "Function '%s' expects %zu parameters but got %zu.",
-                       name, expected, params->size);
+          klt_parser_error(next,
+                           "Function '%s' expects %zu parameters but got %zu.",
+                           name, expected, params->size);
         }
 
         for (size_t i = 0; i < expected; ++i) {
-          NodeFunctionParam* param =
-              *(NodeFunctionParam**)Vector_Get(fn->function_n.params, i);
+          klt_node_fnparam* param =
+              *(klt_node_fnparam**)klt_vector_get(fn->function_n.params, i);
 
-          NodeFunctionParam* callParam =
-              *(NodeFunctionParam**)Vector_Get(params, i);
-          NodeValueType actualType = callParam->type;
+          klt_node_fnparam* callParam =
+              *(klt_node_fnparam**)klt_vector_get(params, i);
+          klt_node_valuetype actualType = callParam->type;
           if (actualType == NODE_VALUE_TYPE_VAR || NODE_VALUE_TYPE_FUNC)
             continue;
           if (param->type != NODE_VALUE_TYPE_ANY && param->type != actualType) {
-            Parser_Error(token,
-                         "Argument %zu to '%s' must be of type %s, got %s",
-                         i + 1, name, Parser_NodeValueTypeToString(param->type),
-                         Parser_NodeValueTypeToString(actualType));
+            klt_parser_error(
+                token, "Argument %zu to '%s' must be of type %s, got %s", i + 1,
+                name, klt_parser_nodevaluetype_to_str(param->type),
+                klt_parser_nodevaluetype_to_str(actualType));
           }
         }
-        return CallNode_New(name, params);
+        return klt_call_node_make(name, params);
       }
 
       // check if its native
-      NativeFunctionEntry* nativeFn = Parser_Native_FindFunction(parser, name);
+      klt_native_fnentry* nativeFn = klt_native_find_function(name);
       if (nativeFn != NULL) {
-        return CallNode_New(name, params);
+        return klt_call_node_make(name, params);
       }
 
-      Parser_Error(
+      klt_parser_error(
           token, "Function '%s' is not declared and is not a native function.",
           name);
     }
 
-    Parser_Error(token, "Unexpected token after identifier: %s", next->text);
+    klt_parser_error(token, "Unexpected token after identifier: %s",
+                     next->text);
   }
-  Parser_Error(token, "Unknown statement: %s", token->text);
+  klt_parser_error(token, "Unknown statement: %s", token->text);
   return NULL;
 }
 
-Node* Parser_ParseFunction(Parser* parser) {
-  Parser_Consume(parser, TOKEN_KEYWORD);
-  String name = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
+klt_node* klt_parser_parse_function(klt_parser* parser) {
+  klt_parser_consume(parser, TOKEN_KEYWORD);
+  klt_str name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
 
-  Parser_Consume(parser, TOKEN_LPAREN);
-  NodeFuncParamVector* params = Vector_New(sizeof(NodeFunctionParam*));
+  klt_parser_consume(parser, TOKEN_LPAREN);
+  klt_node_fnparam_vector* params = klt_vector_make(sizeof(klt_node_fnparam*));
 
   while (true) {
-    Token* next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+    klt_token* next =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
     if (next->type == TOKEN_RPAREN) {
-      Parser_Consume(parser, TOKEN_RPAREN);
+      klt_parser_consume(parser, TOKEN_RPAREN);
       break;
     }
 
-    String type = Parser_Consume(parser, TOKEN_TYPE)->text;
-    Parser_Consume(parser, TOKEN_COLON);
-    String name = Parser_Consume(parser, TOKEN_IDENTIFIER)->text;
+    klt_str type = klt_parser_consume(parser, TOKEN_TYPE)->text;
+    klt_parser_consume(parser, TOKEN_COLON);
+    klt_str name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
 
-    NodeFunctionParam* param = malloc(sizeof(NodeFunctionParam));
+    klt_node_fnparam* param = malloc(sizeof(klt_node_fnparam));
     param->value = strdup(name);
-    param->type = Parser_StringToNodeValueType(type);
+    param->type = klt_parser_str_to_nodevaluetype(type);
     // param->typeStr = strdup(type);
-    Vector_PushBack(params, &param);
+    klt_vector_push_back(params, &param);
 
-    next = *(Token**)Vector_Get(parser->tokens, parser->__pos__);
+    next = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
     if (next->type == TOKEN_COMMA) {
-      Parser_Consume(parser, TOKEN_COMMA);
+      klt_parser_consume(parser, TOKEN_COMMA);
     }
   }
 
-  String returnType = NULL;
-  if ((*(Token**)Vector_Get(parser->tokens, parser->__pos__))->type ==
+  klt_str returnType = NULL;
+  if ((*(klt_token**)klt_vector_get(parser->tokens, parser->__pos__))->type ==
       TOKEN_COLON) {
-    Parser_Consume(parser, TOKEN_COLON);
-    returnType = Parser_Consume(parser, TOKEN_TYPE)->text;
+    klt_parser_consume(parser, TOKEN_COLON);
+    returnType = klt_parser_consume(parser, TOKEN_TYPE)->text;
   }
 
-  Parser_Consume(parser, TOKEN_LBRACE);
-  NodeVector* body = Vector_New(sizeof(Node*));
-  while ((*(Token**)Vector_Get(parser->tokens, parser->__pos__))->type !=
-         TOKEN_RBRACE) {
-    Node* node = Parser_ParseStatement(parser);
-    Vector_PushBack(body, &node);
+  klt_parser_consume(parser, TOKEN_LBRACE);
+  klt_node_vector* body = klt_vector_make(sizeof(klt_node*));
+  while (
+      (*(klt_token**)klt_vector_get(parser->tokens, parser->__pos__))->type !=
+      TOKEN_RBRACE) {
+    klt_node* node = klt_parser_parse_statement(parser);
+    klt_vector_push_back(body, &node);
   }
 
-  Parser_Consume(parser, TOKEN_RBRACE);
+  klt_parser_consume(parser, TOKEN_RBRACE);
 
   if (body->size == 0) {
-    Parser_Error((*(Token**)Vector_Get(parser->tokens, parser->__pos__)),
-                 "Function '%s' is empty, remove or implement it.", name);
+    klt_parser_error(
+        (*(klt_token**)klt_vector_get(parser->tokens, parser->__pos__)),
+        "Function '%s' is empty, remove or implement it.", name);
   }
 
   if (returnType != NULL) {
-    Node* lastNode = *(Node**)Vector_Get(body, body->size - 1);
-    if (lastNode != NULL) {
-      if (lastNode->type != NODE_RETURN) {
-        Parser_Error((*(Token**)Vector_Get(parser->tokens, parser->__pos__)),
-                     "Function '%s' must end with return statement.", name);
+    klt_node* lastklt_node = *(klt_node**)klt_vector_get(body, body->size - 1);
+    if (lastklt_node != NULL) {
+      if (lastklt_node->type != NODE_RETURN) {
+        klt_parser_error(
+            (*(klt_token**)klt_vector_get(parser->tokens, parser->__pos__)),
+            "Function '%s' must end with return statement.", name);
       }
-      NodeValueType retType;
-      if (String_Equals(returnType, "number")) {
+      klt_node_valuetype retType;
+      if (klt_str_equals(returnType, "number")) {
         retType = NODE_VALUE_TYPE_NUMBER;
-      } else if (String_Equals(returnType, "string")) {
+      } else if (klt_str_equals(returnType, "string")) {
         retType = NODE_VALUE_TYPE_STRING;
-      } else if (String_Equals(returnType, "bool")) {
+      } else if (klt_str_equals(returnType, "bool")) {
         retType = NODE_VALUE_TYPE_BOOL;
-      } else if (String_Equals(returnType, "any")) {
+      } else if (klt_str_equals(returnType, "any")) {
         retType = NODE_VALUE_TYPE_ANY;
       } else {
-        retType = lastNode->return_n.returnType;
+        retType = lastklt_node->return_n.returnType;
       }
-      if (retType != lastNode->return_n.returnType) {
-        Parser_Error(
-            (*(Token**)Vector_Get(parser->tokens, parser->__pos__)),
+      if (retType != lastklt_node->return_n.returnType) {
+        klt_parser_error(
+            (*(klt_token**)klt_vector_get(parser->tokens, parser->__pos__)),
             "The expected return type of function '%s' is '%s', but what was "
             "received was: '%s'",
-            name, returnType, Parser_NodeValueTypeToString(retType));
+            name, returnType, klt_parser_nodevaluetype_to_str(retType));
       }
     }
   }
 
-  return FunctionNode_New(name, returnType, body, params);
+  return klt_function_node_make(name, returnType, body, params);
 }
 
-void Parser_ParseProgram(Parser* parser) {
-  Parser_Native_RegisterAllFunctions(parser);
+void klt_parser_parse_program(klt_parser* parser) {
   do {
-    Node* node = Parser_ParseFunction(parser);
-    Vector_PushBack(parser->functions, &node);
-  } while ((*(Token**)Vector_Get(parser->tokens, parser->__pos__))->type !=
-           TOKEN_EOF);
+    klt_node* node = klt_parser_parse_function(parser);
+    klt_vector_push_back(parser->functions, &node);
+  } while (
+      (*(klt_token**)klt_vector_get(parser->tokens, parser->__pos__))->type !=
+      TOKEN_EOF);
 }
 
-void Parser_Error(Token* tk, String fmt, ...) {
+void klt_parser_error(klt_token* tk, klt_str fmt, ...) {
   va_list args;
   va_start(args, fmt);
   fprintf(stderr, "[Error At %zu:%zu] ", tk->line, tk->column);

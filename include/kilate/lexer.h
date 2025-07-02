@@ -1,9 +1,8 @@
-#ifndef LEXER_H
-#define LEXER_H
+#ifndef __LEXER_H__
+#define __LEXER_H__
 
 #include <stdarg.h>
 
-#include "kilate/inline.h"
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
@@ -25,9 +24,9 @@ typedef enum {
   TOKEN_VAR,         // var
   TOKEN_LET,         // let
   TOKEN_EOF          // end of file.
-} TokenType;
+} klt_token_type;
 
-static String Token_GetTypeName(TokenType type) {
+static klt_str klt_tokentype_tostr(klt_token_type type) {
   switch (type) {
     case TOKEN_KEYWORD:
       return "keyword";
@@ -69,32 +68,32 @@ static String Token_GetTypeName(TokenType type) {
 }
 
 typedef struct {
-  TokenType type;
-  String text;
+  klt_token_type type;
+  klt_str text;
 
   size_t column;
   size_t line;
-} Token;
+} klt_token;
 
-typedef Vector TokenVector;
+typedef klt_vector klt_token_vector;
 
-Token* Token_New(TokenType, String, size_t, size_t);
+klt_token* klt_token_make(klt_token_type, klt_str, size_t, size_t);
 
 typedef struct {
-  String __input__;
-  TokenVector* tokens;
+  klt_str __input__;
+  klt_token_vector* tokens;
 
   size_t __pos__;
   size_t __column__;
   size_t __line__;
-} Lexer;
+} klt_lexer;
 
-Lexer* Lexer_New(String);
+klt_lexer* klt_lexer_make(klt_str);
 
-void Lexer_Delete(Lexer*);
+void klt_lexer_delete(klt_lexer*);
 
-void Lexer_Tokenize(Lexer*);
+void klt_lexer_tokenize(klt_lexer*);
 
-void Lexer_Error(Lexer*, String, ...);
+void klt_lexer_error(klt_lexer*, klt_str, ...);
 
 #endif

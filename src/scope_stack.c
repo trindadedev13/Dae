@@ -3,23 +3,23 @@
 #include <stdlib.h>
 
 #include "kilate/error.h"
-#include "kilate/node.h"  // Para Node_Delete
+#include "kilate/node.h"
 #include "kilate/vector.h"
 
-ScopeStack* ScopeStack_New() {
-  ScopeStack* stack = malloc(sizeof(ScopeStack));
-  stack->scopes = Vector_New(sizeof(HashMap*));
+klt_scope_stack* klt_scope_stack_make() {
+  klt_scope_stack* stack = malloc(sizeof(klt_scope_stack));
+  stack->scopes = klt_vector_make(sizeof(klt_hashmap*));
   return stack;
 }
 
-void ScopeStack_Delete(ScopeStack* self) {
+void klt_scope_stack_delete(klt_scope_stack* self) {
   for (size_t i = 0; i < self->scopes->size; i++) {
-    HashMap* map = *(HashMap**)Vector_Get(self->scopes, i);
+    klt_hashmap* map = *(klt_hashmap**)klt_vector_get(self->scopes, i);
 
     // for (size_t i = 0; i < map->itens->size; ++i) {
-    // HashItem* item = *(HashItem**)Vector_Get(map->itens, i);
+    // klt_hashitem* item = *(klt_hashitem**)klt_vector_get(map->itens, i);
     // if (item && item->value) {
-    // Node* node = *(Node**)item->value;
+    // klt_node* node = *(klt_node**)item->value;
     // if (node->type == NODE_VARDEC) {
     // if (node->vardec_n.varName != NULL) free(node->vardec_n.varName);
     // if (node->vardec_n.varType != NULL) free(node->vardec_n.varType);
@@ -28,27 +28,28 @@ void ScopeStack_Delete(ScopeStack* self) {
     // }
     // }
 
-    HashMap_Delete(map);
+    klt_hash_map_delete(map);
   }
-  Vector_Delete(self->scopes);
+  klt_vector_delete(self->scopes);
   free(self);
 }
 
-void ScopeStack_Push(ScopeStack* self) {
-  HashMap* map = HashMap_New(sizeof(Node*));
-  Vector_PushBack(self->scopes, &map);
+void klt_scope_stack_push(klt_scope_stack* self) {
+  klt_hashmap* map = klt_hash_map_make(sizeof(klt_node*));
+  klt_vector_push_back(self->scopes, &map);
 }
 
-void ScopeStack_Pop(ScopeStack* self) {
+void klt_scope_stack_pop(klt_scope_stack* self) {
   if (self->scopes->size == 0) {
-    Error_Fatal("ScopeStack underflow on pop!");
+    klt_error_fatal("klt_scope_stack underflow on pop!");
   }
 
-  HashMap* map = *(HashMap**)Vector_Get(self->scopes, self->scopes->size - 1);
+  klt_hashmap* map =
+      *(klt_hashmap**)klt_vector_get(self->scopes, self->scopes->size - 1);
   for (size_t i = 0; i < map->itens->size; ++i) {
-    HashItem* item = *(HashItem**)Vector_Get(map->itens, i);
+    klt_hashitem* item = *(klt_hashitem**)klt_vector_get(map->itens, i);
     if (item != NULL && item->value != NULL) {
-      Node* node = *(Node**)item->value;
+      klt_node* node = *(klt_node**)item->value;
       if (node->type == NODE_VARDEC) {
         if (node->vardec_n.varName != NULL)
           free(node->vardec_n.varName);
@@ -59,22 +60,23 @@ void ScopeStack_Pop(ScopeStack* self) {
       }
     }
   }
-  HashMap_Delete(map);
-  Vector_Remove(self->scopes, self->scopes->size - 1);
+  klt_hash_map_delete(map);
+  klt_vector_remove(self->scopes, self->scopes->size - 1);
 }
 
-void ScopeStack_Set(ScopeStack* self, String name, Node* value) {
-  HashMap* map = *(HashMap**)Vector_Get(self->scopes, self->scopes->size - 1);
-  HashMap_Put(map, name, &value);
+void klt_scope_stack_set(klt_scope_stack* self, klt_str name, klt_node* value) {
+  klt_hashmap* map =
+      *(klt_hashmap**)klt_vector_get(self->scopes, self->scopes->size - 1);
+  klt_hash_map_put(map, name, &value);
 }
 
-Node* ScopeStack_Get(ScopeStack* self, String name) {
+klt_node* klt_scope_stack_get(klt_scope_stack* self, klt_str name) {
   if (self->scopes->size == 0)
     return NULL;
 
   for (size_t i = self->scopes->size; i-- > 0;) {
-    HashMap* map = *(HashMap**)Vector_Get(self->scopes, i);
-    Node** found = (Node**)HashMap_Get(map, name);
+    klt_hashmap* map = *(klt_hashmap**)klt_vector_get(self->scopes, i);
+    klt_node** found = (klt_node**)klt_hash_map_get(map, name);
     if (found != NULL) {
       return *found;
     }

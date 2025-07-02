@@ -1,5 +1,5 @@
-#ifndef NODE_H
-#define NODE_H
+#ifndef __NODE_H__
+#define __NODE_H__
 
 #include "kilate/lexer.h"
 #include "kilate/string.h"
@@ -11,7 +11,7 @@ typedef enum {
   NODE_CALL,
   NODE_RETURN,
   NODE_VARDEC
-} NodeType;
+} klt_nodetype;
 
 typedef enum {
   NODE_VALUE_TYPE_NUMBER,
@@ -20,53 +20,56 @@ typedef enum {
   NODE_VALUE_TYPE_VAR,
   NODE_VALUE_TYPE_FUNC,
   NODE_VALUE_TYPE_ANY
-} NodeValueType;
+} klt_node_valuetype;
 
-typedef struct Node Node;
-typedef Vector NodeVector;
+typedef struct klt_node klt_node;
+typedef klt_vector klt_node_vector;
 
 typedef struct {
-  String value;
-  // String typeStr;
-  NodeValueType type;
-} NodeFunctionParam;
+  klt_str value;
+  // klt_str typeStr;
+  klt_node_valuetype type;
+} klt_node_fnparam;
 
-typedef Vector NodeFuncParamVector;
+typedef klt_vector klt_node_fnparam_vector;
 
-struct Node {
-  NodeType type;
+struct klt_node {
+  klt_nodetype type;
 
   struct {
-    String name;
-    String returnType;
-    NodeVector* body;
-    NodeFuncParamVector* params;
+    klt_str name;
+    klt_str returnType;
+    klt_node_vector* body;
+    klt_node_fnparam_vector* params;
   } function_n;
 
   struct {
-    String functionName;
-    NodeFuncParamVector* functionParams;
+    klt_str functionName;
+    klt_node_fnparam_vector* functionParams;
   } call_n;
 
   struct {
-    NodeValueType returnType;
+    klt_node_valuetype returnType;
     void* returnValue;
   } return_n;
 
   struct {
-    String varName;
-    String varType;
-    NodeValueType varValueType;
+    klt_str varName;
+    klt_str varType;
+    klt_node_valuetype varValueType;
     void* varValue;
   } vardec_n;
 };
 
-Node* FunctionNode_New(String, String, NodeVector*, NodeFuncParamVector*);
+klt_node* klt_function_node_make(klt_str,
+                                 klt_str,
+                                 klt_node_vector*,
+                                 klt_node_fnparam_vector*);
 
-Node* CallNode_New(String, NodeFuncParamVector*);
+klt_node* klt_call_node_make(klt_str, klt_node_fnparam_vector*);
 
-Node* ReturnNode_New(NodeValueType, void*);
+klt_node* klt_return_node_make(klt_node_valuetype, void*);
 
-Node* VarDecNode_New(String, String, NodeValueType, void*);
+klt_node* klt_var_dec_node_make(klt_str, klt_str, klt_node_valuetype, void*);
 
 #endif

@@ -6,7 +6,7 @@
 
 #include "kilate/string.h"
 
-void Error_Fatal(String fmt, ...) {
+void klt_error_fatal(klt_str fmt, ...) {
   va_list args;
   va_start(args, fmt);
   fprintf(stderr, "[ERROR] ");

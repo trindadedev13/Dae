@@ -5,7 +5,7 @@
 
 #include "kilate/error.h"
 
-size_t String_Length(String str) {
+size_t klt_str_length(klt_str str) {
   size_t len = 0;
   while (str[len] != '\0') {
     len++;
@@ -13,15 +13,15 @@ size_t String_Length(String str) {
   return len;
 }
 
-bool String_StartsWith(String str, String startWith, size_t offset) {
-  if (strncmp(str + offset, startWith, String_Length(startWith)) == 0) {
+bool klt_str_starts_with(klt_str str, klt_str startWith, size_t offset) {
+  if (strncmp(str + offset, startWith, klt_str_length(startWith)) == 0) {
     return true;
   }
   return false;
 }
 
-size_t String_IndexOf(const String str, char ch, size_t offset) {
-  String ptr = strchr(str + offset, ch);
+size_t klt_str_index_of(const klt_str str, char ch, size_t offset) {
+  klt_str ptr = strchr(str + offset, ch);
   if (ptr == NULL) {
     printf("Failed to get index of string %s\n", str);
     return SIZE_MAX;
@@ -29,13 +29,13 @@ size_t String_IndexOf(const String str, char ch, size_t offset) {
   return ptr - str;
 }
 
-String String_Substring(const String str, size_t start, size_t end) {
-  if (!str || start > end || end > String_Length(str)) {
+klt_str klt_str_substring(const klt_str str, size_t start, size_t end) {
+  if (!str || start > end || end > klt_str_length(str)) {
     return NULL;
   }
 
   size_t len = end - start;
-  String result = malloc(len + 1);
+  klt_str result = malloc(len + 1);
   if (!result)
     return NULL;
 
@@ -44,18 +44,18 @@ String String_Substring(const String str, size_t start, size_t end) {
   return result;
 }
 
-bool String_Equals(const String str, const String other) {
+bool klt_str_equals(const klt_str str, const klt_str other) {
   if (strcmp(str, other) == 0) {
     return true;
   }
   return false;
 }
 
-void String_Concat(String dest, const String toConcat) {
+void klt_str_concat(klt_str dest, const klt_str toConcat) {
   strcat(dest, toConcat);
 }
 
-int String_ToInt(const String src) {
+int klt_str_to_int(const klt_str src) {
   int num = 0;
   int i = 0;
   int sign = 1;
@@ -65,7 +65,7 @@ int String_ToInt(const String src) {
     i = 1;
   }
 
-  for (; i < String_Length(src); ++i) {
+  for (; i < klt_str_length(src); ++i) {
     if (src[i] >= '0' && src[i] <= '9') {
       num = num * 10 + (src[i] - '0');
     } else {
@@ -76,14 +76,14 @@ int String_ToInt(const String src) {
   return sign * num;
 }
 
-String String_Format(const String fmt, ...) {
+klt_str klt_str_format(const klt_str fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
   size_t len = vsnprintf(NULL, 0, fmt, args);
   va_end(args);
 
-  String buffer = malloc(len + 1);
+  klt_str buffer = malloc(len + 1);
   if (!buffer)
     return NULL;
 
@@ -92,4 +92,35 @@ String String_Format(const String fmt, ...) {
   va_end(args);
 
   return buffer;
+}
+
+klt_str klt_str_interpret_escapes(klt_str input) {
+  size_t len = klt_str_length(input);
+  klt_str output = malloc(len + 1);
+  size_t j = 0;
+
+  for (size_t i = 0; i < len; ++i) {
+    if (input[i] == '\\' && i + 1 < len) {
+      i++;
+      switch (input[i]) {
+        case 'n':
+          output[j++] = '\n';
+          break;
+        case 't':
+          output[j++] = '\t';
+          break;
+        case '\\':
+          output[j++] = '\\';
+          break;
+        default:
+          output[j++] = input[i];
+          break;
+      }
+    } else {
+      output[j++] = input[i];
+    }
+  }
+
+  output[j] = '\0';
+  return output;
 }

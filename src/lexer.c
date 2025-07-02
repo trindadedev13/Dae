@@ -2,37 +2,40 @@
 
 #include <ctype.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "kilate/error.h"
 #include "kilate/string.h"
 
-Lexer* Lexer_New(String input) {
-  Lexer* lexer = malloc(sizeof(Lexer));
+klt_lexer* klt_lexer_make(klt_str input) {
+  klt_lexer* lexer = malloc(sizeof(klt_lexer));
   lexer->__pos__ = 0;
   lexer->__input__ = strdup(input);
-  lexer->tokens = Vector_New(sizeof(Token*));
+  lexer->tokens = klt_vector_make(sizeof(klt_token*));
   lexer->__line__ = 1;
   lexer->__column__ = 1;
   return lexer;
 }
 
-void Lexer_Delete(Lexer* lexer) {
+void klt_lexer_delete(klt_lexer* lexer) {
   for (size_t i = 0; i < lexer->tokens->size; ++i) {
-    Token* token = *(Token**)Vector_Get(lexer->tokens, i);
+    klt_token* token = *(klt_token**)klt_vector_get(lexer->tokens, i);
     free(token->text);
     free(token);
   }
-  Vector_Delete(lexer->tokens);
+  klt_vector_delete(lexer->tokens);
   free(lexer->__input__);
   free(lexer);
 }
 
-Token* Token_New(TokenType type, String text, size_t line, size_t column) {
-  Token* tk = malloc(sizeof(Token));
+klt_token* klt_token_make(klt_token_type type,
+                          klt_str text,
+                          size_t line,
+                          size_t column) {
+  klt_token* tk = malloc(sizeof(klt_token));
   tk->type = type;
   tk->text = strdup(text);
   tk->line = line;
@@ -40,7 +43,7 @@ Token* Token_New(TokenType type, String text, size_t line, size_t column) {
   return tk;
 }
 
-void Lexer_Advance(Lexer* lexer) {
+void klt_lexer_Advance(klt_lexer* lexer) {
   if (lexer->__input__[lexer->__pos__] == '\n') {
     lexer->__line__++;
     lexer->__column__ = 1;
@@ -50,12 +53,12 @@ void Lexer_Advance(Lexer* lexer) {
   lexer->__pos__++;
 }
 
-void Lexer_Tokenize(Lexer* lexer) {
-  size_t inputLen = String_Length(lexer->__input__);
+void klt_lexer_tokenize(klt_lexer* lexer) {
+  size_t inputLen = klt_str_length(lexer->__input__);
   while (lexer->__pos__ < inputLen) {
     char c = lexer->__input__[lexer->__pos__];
     if (isspace(c)) {
-      Lexer_Advance(lexer);
+      klt_lexer_Advance(lexer);
       continue;
     }
 
@@ -63,110 +66,111 @@ void Lexer_Tokenize(Lexer* lexer) {
       case '(': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_LPAREN, "(", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_LPAREN, "(", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case ')': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_RPAREN, ")", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_RPAREN, ")", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case '{': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_LBRACE, "{", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_LBRACE, "{", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case '}': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_RBRACE, "}", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_RBRACE, "}", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case ':': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_COLON, ":", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_COLON, ":", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case ',': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_COMMA, ",", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_COMMA, ",", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case '=': {
         size_t tkl = lexer->__line__;
         size_t tkc = lexer->__column__;
-        Token* token = Token_New(TOKEN_ASSIGN, "=", tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_ASSIGN, "=", tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case '\n': {
         // lexer->__line__++;
         //   lexer->__column__ = 1;
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
       case ';': {
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         continue;
       }
     };
-    if (String_StartsWith(lexer->__input__, "//", lexer->__pos__)) {
+    if (klt_str_starts_with(lexer->__input__, "//", lexer->__pos__)) {
       lexer->__pos__ += 2;
       while (lexer->__pos__ < inputLen &&
              lexer->__input__[lexer->__pos__] != '\n') {
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
       }
       continue;
     }
-    if (String_StartsWith(lexer->__input__, "->", lexer->__pos__)) {
+    if (klt_str_starts_with(lexer->__input__, "->", lexer->__pos__)) {
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      Token* token = Token_New(TOKEN_ARROW, "->", tkl, tkc);
-      Vector_PushBack(lexer->tokens, &token);
+      klt_token* token = klt_token_make(TOKEN_ARROW, "->", tkl, tkc);
+      klt_vector_push_back(lexer->tokens, &token);
 
       lexer->__pos__ += 2;
       continue;
     }
     if (c == '"') {
-      size_t end = String_IndexOf(lexer->__input__, '"', lexer->__pos__ + 1);
+      size_t end = klt_str_index_of(lexer->__input__, '"', lexer->__pos__ + 1);
       if (end == SIZE_MAX) {
         printf("Unclosed string\n");
         lexer->__pos__ = inputLen;
         break;
       }
-      String str = String_Substring(lexer->__input__, lexer->__pos__ + 1, end);
+      klt_str str =
+          klt_str_substring(lexer->__input__, lexer->__pos__ + 1, end);
       if (str == NULL) {
         printf("Failed to get substr\n");
         break;
       }
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      Token* token = Token_New(TOKEN_STRING, str, tkl, tkc);
-      Vector_PushBack(lexer->tokens, &token);
+      klt_token* token = klt_token_make(TOKEN_STRING, str, tkl, tkc);
+      klt_vector_push_back(lexer->tokens, &token);
       free(str);
 
       lexer->__pos__ = end + 1;
@@ -176,17 +180,18 @@ void Lexer_Tokenize(Lexer* lexer) {
       size_t start = lexer->__pos__;
       while (lexer->__pos__ < inputLen &&
              isdigit(lexer->__input__[lexer->__pos__])) {
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
         lexer->__line__++;
       }
-      String number = String_Substring(lexer->__input__, start, lexer->__pos__);
+      klt_str number =
+          klt_str_substring(lexer->__input__, start, lexer->__pos__);
       if (number == NULL) {
-        Lexer_Error(lexer, "Failed to extract number");
+        klt_lexer_error(lexer, "Failed to extract number");
       }
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      Token* token = Token_New(TOKEN_NUMBER, number, tkl, tkc);
-      Vector_PushBack(lexer->tokens, &token);
+      klt_token* token = klt_token_make(TOKEN_NUMBER, number, tkl, tkc);
+      klt_vector_push_back(lexer->tokens, &token);
       free(number);
       continue;
     }
@@ -196,50 +201,53 @@ void Lexer_Tokenize(Lexer* lexer) {
       while (lexer->__pos__ < inputLen &&
              (isalpha(lexer->__input__[lexer->__pos__]) ||
               isdigit(lexer->__input__[lexer->__pos__]))) {
-        Lexer_Advance(lexer);
+        klt_lexer_Advance(lexer);
       }
-      String word = String_Substring(lexer->__input__, start, lexer->__pos__);
+      klt_str word = klt_str_substring(lexer->__input__, start, lexer->__pos__);
       if (word == NULL) {
-        Lexer_Error(lexer, "Failed to get word");
+        klt_lexer_error(lexer, "Failed to get word");
         break;
       }
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      if (String_Equals(word, "work") || String_Equals(word, "return")) {
-        Token* token = Token_New(TOKEN_KEYWORD, word, tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+      if (klt_str_equals(word, "work") || klt_str_equals(word, "return")) {
+        klt_token* token = klt_token_make(TOKEN_KEYWORD, word, tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-      } else if (String_Equals(word, "true") || String_Equals(word, "false")) {
-        Token* token = Token_New(TOKEN_BOOL, word, tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+      } else if (klt_str_equals(word, "true") ||
+                 klt_str_equals(word, "false")) {
+        klt_token* token = klt_token_make(TOKEN_BOOL, word, tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
 
-      } else if (String_Equals(word, "bool") || String_Equals(word, "number") ||
-                 String_Equals(word, "string") || String_Equals(word, "any")) {
-        Token* token = Token_New(TOKEN_TYPE, word, tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
-      } else if (String_Equals(word, "var")) {
-        Token* token = Token_New(TOKEN_VAR, word, tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
-      } else if (String_Equals(word, "let")) {
-        Token* token = Token_New(TOKEN_LET, word, tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+      } else if (klt_str_equals(word, "bool") ||
+                 klt_str_equals(word, "number") ||
+                 klt_str_equals(word, "string") ||
+                 klt_str_equals(word, "any")) {
+        klt_token* token = klt_token_make(TOKEN_TYPE, word, tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
+      } else if (klt_str_equals(word, "var")) {
+        klt_token* token = klt_token_make(TOKEN_VAR, word, tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
+      } else if (klt_str_equals(word, "let")) {
+        klt_token* token = klt_token_make(TOKEN_LET, word, tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
       } else {
-        Token* token = Token_New(TOKEN_IDENTIFIER, word, tkl, tkc);
-        Vector_PushBack(lexer->tokens, &token);
+        klt_token* token = klt_token_make(TOKEN_IDENTIFIER, word, tkl, tkc);
+        klt_vector_push_back(lexer->tokens, &token);
       }
       free(word);
       continue;
     }
-    Lexer_Error(lexer, "Unexpected character %c", c);
+    klt_lexer_error(lexer, "Unexpected character %c", c);
     break;
   }
   size_t tkl = lexer->__line__;
   size_t tkc = lexer->__column__;
-  Token* token = Token_New(TOKEN_EOF, "", tkl, tkc);
-  Vector_PushBack(lexer->tokens, &token);
+  klt_token* token = klt_token_make(TOKEN_EOF, "", tkl, tkc);
+  klt_vector_push_back(lexer->tokens, &token);
 }
 
-void Lexer_Error(Lexer* lexer, String fmt, ...) {
+void klt_lexer_error(klt_lexer* lexer, klt_str fmt, ...) {
   va_list args;
   va_start(args, fmt);
   fprintf(stderr, "[Error at %zu:%zu] ", lexer->__line__, lexer->__column__);

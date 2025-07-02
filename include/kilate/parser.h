@@ -1,62 +1,45 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef __PARSER_H__
+#define __PARSER_H__
 
 #include <stdarg.h>
 
 #include "kilate/lexer.h"
+#include "kilate/native.h"
 #include "kilate/node.h"
-#include "kilate/parser_native_funcs.h"
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
-typedef Node* (*NativeFunction)(NativeFnData*);
-
 typedef struct {
-  String name;
-  StringVector* requiredParams;
-  NativeFunction fn;
-} NativeFunctionEntry;
-
-typedef struct {
-  TokenVector* tokens;
-  NodeVector* functions;
-  NodeVector* nativeFunctions;
+  klt_token_vector* tokens;
+  klt_node_vector* functions;
   size_t __pos__;
-} Parser;
+} klt_parser;
 
-Parser* Parser_New(TokenVector*);
+klt_parser* klt_parser_make(klt_token_vector*);
 
-void Parser_Delete(Parser*);
+void klt_parser_delete(klt_parser*);
 
-void Parser_DeleteParams(StringVector*);
+void klt_parser_delete_params(klt_str_vector*);
 
-Token* Parser_Consume(Parser*, TokenType);
+klt_token* klt_parser_consume(klt_parser*, klt_token_type);
 
-Node* Parser_FindFunction(Parser*, String);
+klt_node* klt_parser_find_function(klt_parser*, klt_str);
 
-void Parser_Native_RegisterFunction(Parser* parser,
-                                    String,
-                                    StringVector*,
-                                    NativeFunction);
+klt_str klt_parser_tokentype_to_str(klt_token_type);
 
-NativeFunctionEntry* Parser_Native_FindFunction(Parser*, String);
+klt_str klt_parser_nodevaluetype_to_str(klt_node_valuetype);
 
-void Parser_Native_RegisterAllFunctions(Parser*);
+klt_node_valuetype klt_parser_tokentype_to_nodevaluetype(klt_parser*,
+                                                         klt_token*);
 
-String Parser_TokenTypeToString(TokenType);
+klt_node_valuetype klt_parser_str_to_nodevaluetype(klt_str);
 
-String Parser_NodeValueTypeToString(NodeValueType);
+klt_node* klt_parser_parse_function(klt_parser*);
 
-NodeValueType Parser_TokenTypeToNodeValueType(Parser*, Token*);
+klt_node* klt_parser_parse_statement(klt_parser*);
 
-NodeValueType Parser_StringToNodeValueType(String);
+void klt_parser_parse_program(klt_parser*);
 
-Node* Parser_ParseFunction(Parser*);
-
-Node* Parser_ParseStatement(Parser*);
-
-void Parser_ParseProgram(Parser*);
-
-void Parser_Error(Token*, String, ...);
+void klt_parser_error(klt_token*, klt_str, ...);
 
 #endif

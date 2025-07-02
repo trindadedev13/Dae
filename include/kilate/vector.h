@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef __VECTOR_H__
+#define __VECTOR_H__
 
 #include <stdio.h>
 
@@ -8,24 +8,22 @@ typedef struct {
   size_t capacity;
   size_t size;
   size_t itemSize;
-} Vector;
+} klt_vector;
 
-typedef Vector StringVector;
+klt_vector* klt_vector_make(size_t);
 
-Vector* Vector_New(size_t);
+void klt_vector_delete(klt_vector*);
 
-void Vector_Delete(Vector*);
+const void* klt_vector_get(klt_vector*, size_t);
 
-const void* Vector_Get(Vector*, size_t);
+void klt_vector_set(klt_vector*, const size_t, const void*);
 
-void Vector_Set(Vector*, const size_t, const void*);
+void klt_vector_reserve(klt_vector*, const size_t);
 
-void Vector_Reserve(Vector*, const size_t);
+void klt_vector_insert(klt_vector*, const size_t, const void*);
 
-void Vector_Insert(Vector*, const size_t, const void*);
+void klt_vector_push_back(klt_vector*, const void*);
 
-void Vector_PushBack(Vector*, const void*);
-
-void Vector_Remove(Vector*, size_t);
+void klt_vector_remove(klt_vector*, size_t);
 
 #endif

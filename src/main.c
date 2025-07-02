@@ -5,30 +5,34 @@
 #include "kilate/file.h"
 #include "kilate/interpreter.h"
 #include "kilate/lexer.h"
+#include "kilate/native.h"
 #include "kilate/parser.h"
 #include "kilate/string.h"
 
-bool Interpret(String src) {
-  Lexer* lexer = Lexer_New(src);
+bool interpret(klt_str src) {
+  klt_lexer* lexer = klt_lexer_make(src);
   assert(lexer);
-  Lexer_Tokenize(lexer);
+  klt_lexer_tokenize(lexer);
 
-  Parser* parser = Parser_New(lexer->tokens);
+  klt_native_init();
+
+  klt_parser* parser = klt_parser_make(lexer->tokens);
   assert(parser);
 
-  Parser_ParseProgram(parser);
+  klt_parser_parse_program(parser);
 
-  Interpreter* interpreter =
-      Interpreter_New(parser->functions, parser->nativeFunctions);
+  klt_interpreter* interpreter =
+      klt_interpreter_make(parser->functions, native_functions);
   assert(interpreter);
 
-  InterpreterResult result = Interpreter_Run(interpreter);
+  klt_interpreter_result result = klt_interpreter_run(interpreter);
 
   assert(result.data);
 
-  Parser_Delete(parser);
-  Interpreter_Delete(interpreter);
-  Lexer_Delete(lexer);
+  klt_parser_delete(parser);
+  klt_interpreter_delete(interpreter);
+  klt_lexer_delete(lexer);
+  klt_native_end();
   return true;
 }
 
@@ -38,28 +42,28 @@ bool Run(int argc, char* argv[]) {
     printf("Use %s help for more info.\n", argv[0]);
     return false;
   }
-  String action = argv[1];
-  if (String_Equals(action, "run")) {
+  klt_str action = argv[1];
+  if (klt_str_equals(action, "run")) {
     // TODO: SUPPORT MULTIPLES FILES
     if (argc < 3) {
-      Error_Fatal("Please provide at least 1 file!");
+      klt_error_fatal("Please provide at least 1 file!");
       return false;
     }
-    File* file = File_Open(argv[2], FileMode_Read);
+    klt_file* file = klt_file_open(argv[2], FILE_MODE_READ);
     if (file == NULL) {
-      Error_Fatal("Failed to open %s", argv[2]);
+      klt_error_fatal("Failed to open %s", argv[2]);
       return false;
     }
-    String src = File_ReadText(file);
+    klt_str src = klt_file_read_text(file);
     if (src == NULL) {
-      Error_Fatal("Failed to read %s", argv[2]);
+      klt_error_fatal("Failed to read %s", argv[2]);
       return false;
     }
-    bool interRes = Interpret(src);
+    bool interRes = interpret(src);
     free(src);
-    File_Close(file);
+    klt_file_close(file);
     return interRes;
-  } else if (String_Equals(action, "help")) {
+  } else if (klt_str_equals(action, "help")) {
     printf("%s help        : prints help\n", argv[0]);
     printf("%s run <files> : executes an kilate file.\n", argv[0]);
     return true;

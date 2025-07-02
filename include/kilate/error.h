@@ -1,10 +1,10 @@
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef __ERROR_H__
+#define __ERROR_H__
 
 #include <stdarg.h>
 
 #include "kilate/string.h"
 
-void Error_Fatal(String, ...);
+void klt_error_fatal(klt_str, ...);
 
 #endif

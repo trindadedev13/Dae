@@ -1,27 +1,25 @@
-#ifndef SCOPE_STACK_H
-#define SCOPE_STACK_H
+#ifndef __SCOPE_STACK_H__
+#define __SCOPE_STACK_H__
 
 #include "kilate/hashmap.h"
 #include "kilate/node.h"
 #include "kilate/string.h"
 
-#define MAX_SCOPE_DEPTH 64
-
 typedef struct {
-  HashMapVector* scopes;
+  klt_hashmap_vector* scopes;
   size_t count;
-} ScopeStack;
+} klt_scope_stack;
 
-ScopeStack* ScopeStack_New();
+klt_scope_stack* klt_scope_stack_make();
 
-void ScopeStack_Delete(ScopeStack*);
+void klt_scope_stack_delete(klt_scope_stack*);
 
-void ScopeStack_Push(ScopeStack*);
+void klt_scope_stack_push(klt_scope_stack*);
 
-void ScopeStack_Pop(ScopeStack*);
+void klt_scope_stack_pop(klt_scope_stack*);
 
-void ScopeStack_Set(ScopeStack*, String, Node*);
+void klt_scope_stack_set(klt_scope_stack*, klt_str, klt_node*);
 
-Node* ScopeStack_Get(ScopeStack*, String);
+klt_node* klt_scope_stack_get(klt_scope_stack*, klt_str);
 
 #endif

@@ -1,25 +1,30 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef __STRING_H__
+#define __STRING_H__
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-typedef char* String;
+#include "kilate/vector.h"
 
-size_t String_Length(const String);
+typedef char* klt_str;
+typedef klt_vector klt_str_vector;
 
-bool String_StartsWith(const String, const String, size_t);
+size_t klt_str_length(const klt_str);
 
-size_t String_IndexOf(const String, char, size_t);
+bool klt_str_starts_with(const klt_str, const klt_str, size_t);
 
-String String_Substring(const String, size_t, size_t);
+size_t klt_str_index_of(const klt_str, char, size_t);
 
-bool String_Equals(const String, const String);
+klt_str klt_str_substring(const klt_str, size_t, size_t);
 
-void String_Concat(String, String);
+bool klt_str_equals(const klt_str, const klt_str);
 
-int String_ToInt(String);
+void klt_str_concat(klt_str, klt_str);
 
-String String_Format(const String, ...);
+int klt_str_to_int(klt_str);
+
+klt_str klt_str_format(const klt_str, ...);
+
+klt_str klt_str_interpret_escapes(klt_str);
 
 #endif

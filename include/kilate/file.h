@@ -1,24 +1,24 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef __FILE_H__
+#define __FILE_H__
 
 #include <stdio.h>
 
 #include "kilate/string.h"
 
-#define FileMode_Read "r"
-#define FileMode_Write "w"
+#define FILE_MODE_READ "r"
+#define FILE_MODE_WRITE "w"
 
 typedef struct {
-  FILE* stdFile;
-  String path;
-} File;
+  FILE* std_file;
+  klt_str path;
+} klt_file;
 
-File* File_Open(String, String);
+klt_file* klt_file_open(klt_str, klt_str);
 
-void File_Close(File*);
+void klt_file_close(klt_file*);
 
-size_t File_GetLength(File*);
+size_t klt_file_get_length(klt_file*);
 
-String File_ReadText(File*);
+klt_str klt_file_read_text(klt_file*);
 
 #endif
