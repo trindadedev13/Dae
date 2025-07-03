@@ -131,8 +131,7 @@ klt_node* klt_native_print(klt_native_fndata* data) {
           // Does nothing for now
           break;
       }
-      free(data);
-      return NULL;
+      continue;
     }
     klt_str interpreted = klt_str_interpret_escapes(param->value);
     printf("%s", interpreted);
@@ -156,8 +155,7 @@ klt_node* klt_native_system(klt_native_fndata* data) {
         default:
           break;
       }
-      free(data);
-      return NULL;
+      continue;
     }
     system(param->value);
   }
