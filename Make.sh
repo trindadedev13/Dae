@@ -117,10 +117,9 @@ else
     -DASAN=$ASAN_P \
     -DINSTALL=$INSTALL_P \
     -DCMAKE_INSTALL_PREFIX=$HOME/../usr
-fi
 
-# Finally build
-cmake --build build
+  cmake --build build
+fi
 
 # Install program if install is ON
 if [ "$INSTALL_P" = ON ]; then
