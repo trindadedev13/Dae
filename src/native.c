@@ -6,6 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#define psleep(ms) Sleep(ms)
+#else
+#include <unistd.h>
+#define psleep(ms) usleep(ms * 1000)
+#endif
+
 #include "kilate/lexer.h"
 #include "kilate/node.h"
 #include "kilate/string.h"
@@ -79,6 +87,13 @@ void klt_native_register_all_functions() {
     klt_str str = "string";
     klt_vector_push_back(requiredParams, &str);
     klt_native_register_fn("system", requiredParams, klt_native_system);
+  }
+  {
+    // Register native system method
+    klt_str_vector* requiredParams = klt_vector_make(sizeof(klt_str*));
+    klt_str str = "number";
+    klt_vector_push_back(requiredParams, &str);
+    klt_native_register_fn("sleep", requiredParams, klt_native_sleep);
   }
 }
 
@@ -164,5 +179,19 @@ klt_node* klt_native_system(klt_native_fndata* data) {
     system(param->value);
   }
   free(data);
+  return NULL;
+}
+
+klt_node* klt_native_sleep(klt_native_fndata* data) {
+  klt_node_fnparam* param =
+        *(klt_node_fnparam**)klt_vector_get(data->params, 0);
+  if (param->type == NODE_VALUE_TYPE_VAR) {
+    klt_node* var = klt_scope_stack_get(data->varStack, param->value);
+    void* value = var->vardec_n.varValue;
+    if (var->vardec_n.varValueType != NODE_VALUE_TYPE_NUMBER) {
+      psleep((int)(intptr_t)param->value);
+    }
+  }
+  psleep(klt_str_to_int(param->value));
   return NULL;
 }

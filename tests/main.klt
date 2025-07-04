@@ -12,5 +12,6 @@ work main(): bool {
   let varInMain = "Opa"
   println -> varInMain
   testVarsScope()
+  sleep -> 2000
   return -> true
 }

@@ -39,7 +39,7 @@ klt_native_fnentry* klt_native_find_function(klt_str);
 void klt_native_register_all_functions();
 
 klt_node* klt_native_print(klt_native_fndata*);
-
 klt_node* klt_native_system(klt_native_fndata*);
+klt_node* klt_native_sleep(klt_native_fndata*);
 
 #endif
