@@ -7,7 +7,8 @@
 
 klt_environment* klt_environment_make(klt_environment* parent) {
   klt_environment* env = malloc(sizeof(klt_environment));
-  if (env == NULL) return NULL;
+  if (env == NULL)
+    return NULL;
 
   env->entries = NULL;
   env->parent = parent;
@@ -15,7 +16,8 @@ klt_environment* klt_environment_make(klt_environment* parent) {
 }
 
 void klt_environment_destroy(klt_environment* env) {
-  if (env != NULL) return;
+  if (env != NULL)
+    return;
 
   klt_env_entry* current = env->entries;
   while (current) {
@@ -28,8 +30,11 @@ void klt_environment_destroy(klt_environment* env) {
   free(env);
 }
 
-bool klt_environment_define(klt_environment* env, const klt_str name, void* value) {
-  if (env == NULL || name == NULL) return false;
+bool klt_environment_define(klt_environment* env,
+                            const klt_str name,
+                            void* value) {
+  if (env == NULL || name == NULL)
+    return false;
 
   klt_env_entry* current = env->entries;
   while (current) {
@@ -40,7 +45,8 @@ bool klt_environment_define(klt_environment* env, const klt_str name, void* valu
   }
 
   klt_env_entry* new_entry = malloc(sizeof(klt_env_entry));
-  if (!new_entry) return false;
+  if (!new_entry)
+    return false;
 
   new_entry->name = strdup(name);
   new_entry->value = value;
@@ -51,7 +57,8 @@ bool klt_environment_define(klt_environment* env, const klt_str name, void* valu
 }
 
 klt_node* klt_environment_get(klt_environment* env, const klt_str name) {
-  if (env == NULL|| name == NULL) return NULL;
+  if (env == NULL || name == NULL)
+    return NULL;
 
   klt_environment* current_env = env;
   while (current_env) {
@@ -68,8 +75,11 @@ klt_node* klt_environment_get(klt_environment* env, const klt_str name) {
   return NULL;
 }
 
-bool klt_environment_set(klt_environment* env, const klt_str name, void* value) {
-  if (env == NULL|| name == NULL) return false;
+bool klt_environment_set(klt_environment* env,
+                         const klt_str name,
+                         void* value) {
+  if (env == NULL || name == NULL)
+    return false;
 
   klt_environment* current_env = env;
   while (current_env) {

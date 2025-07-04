@@ -17,12 +17,13 @@ typedef struct klt_environment {
   struct klt_environment* parent;
 } klt_environment;
 
-
 klt_environment* klt_environment_make(klt_environment* parent);
 
 void klt_environment_destroy(klt_environment* env);
 
-bool klt_environment_define(klt_environment* env, const klt_str name, void* value);
+bool klt_environment_define(klt_environment* env,
+                            const klt_str name,
+                            void* value);
 
 klt_node* klt_environment_get(klt_environment* env, const klt_str name);
 

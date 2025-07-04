@@ -88,12 +88,12 @@ klt_interpreter_result klt_interpreter_run_fn(klt_interpreter* self,
       void* actualValue = param->value;
 
       if (param->type == NODE_VALUE_TYPE_VAR) {
-        klt_node* real_var =
-            klt_environment_get(old, (klt_str)param->value);
+        klt_node* real_var = klt_environment_get(old, (klt_str)param->value);
         if (real_var == NULL) {
           klt_error_fatal("Variable not defined: %s", (klt_str)param->value);
         }
-        actualType = klt_parser_str_to_nodevaluetype(real_var->vardec_n.varType);
+        actualType =
+            klt_parser_str_to_nodevaluetype(real_var->vardec_n.varType);
         actualValue = real_var->vardec_n.varValue;
       }
 
