@@ -82,6 +82,10 @@ void klt_native_register_all_functions() {
   }
 }
 
+void klt_native_register_fnentry(klt_native_fnentry* entry) {
+  klt_vector_push_back(native_functions, &entry);
+}
+
 void klt_native_register_fn(klt_str name,
                             klt_str_vector* requiredParams,
                             klt_native_fn fn) {
@@ -89,7 +93,7 @@ void klt_native_register_fn(klt_str name,
   entry->name = strdup(name);
   entry->fn = fn;
   entry->requiredParams = requiredParams;
-  klt_vector_push_back(native_functions, &entry);
+  klt_native_register_fnentry(entry);
 }
 
 klt_native_fnentry* klt_native_find_function(klt_str name) {

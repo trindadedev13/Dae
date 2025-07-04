@@ -30,6 +30,8 @@ void klt_native_load_extern();
 
 void klt_native_end();
 
+void klt_native_register_fnentry(klt_native_fnentry*);
+
 void klt_native_register_fn(klt_str, klt_str_vector*, klt_native_fn);
 
 klt_native_fnentry* klt_native_find_function(klt_str);
