@@ -3,12 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "kilate/bool.h"
+#include "kilate/error.h"
 #include "kilate/string.h"
 
 klt_environment* klt_environment_make(klt_environment* parent) {
   klt_environment* env = malloc(sizeof(klt_environment));
   if (env == NULL)
-    return NULL;
+    klt_error_fatal("Failed to allocate environment");
 
   env->entries = NULL;
   env->parent = parent;
@@ -16,7 +18,7 @@ klt_environment* klt_environment_make(klt_environment* parent) {
 }
 
 void klt_environment_destroy(klt_environment* env) {
-  if (env != NULL)
+  if (env == NULL)
     return;
 
   klt_env_entry* current = env->entries;
@@ -30,11 +32,11 @@ void klt_environment_destroy(klt_environment* env) {
   free(env);
 }
 
-bool klt_environment_define(klt_environment* env,
-                            const klt_str name,
-                            void* value) {
+klt_bool klt_environment_define(klt_environment* env,
+                                const klt_str name,
+                                void* value) {
   if (env == NULL || name == NULL)
-    return false;
+    klt_error_fatal("Environment or name is null.");
 
   klt_env_entry* current = env->entries;
   while (current) {
@@ -58,7 +60,7 @@ bool klt_environment_define(klt_environment* env,
 
 klt_node* klt_environment_get(klt_environment* env, const klt_str name) {
   if (env == NULL || name == NULL)
-    return NULL;
+    klt_error_fatal("Environment or name is null.");
 
   klt_environment* current_env = env;
   while (current_env) {
@@ -75,11 +77,11 @@ klt_node* klt_environment_get(klt_environment* env, const klt_str name) {
   return NULL;
 }
 
-bool klt_environment_set(klt_environment* env,
-                         const klt_str name,
-                         void* value) {
+klt_bool klt_environment_set(klt_environment* env,
+                             const klt_str name,
+                             void* value) {
   if (env == NULL || name == NULL)
-    return false;
+    klt_error_fatal("Environment or name is null.");
 
   klt_environment* current_env = env;
   while (current_env) {

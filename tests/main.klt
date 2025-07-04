@@ -1,11 +1,5 @@
-work kw_create_window(): long {
-  return <- 5l
-}
-
 work main(): bool {
-  let window_ptr = kw_create_window()
-  print -> window_ptr, "\n"
-  print  <- "ayo"
-  print  -> "\n"
-  return <- true;
+  print -> "ayo"
+  print -> "\n"
+  return -> true
 }

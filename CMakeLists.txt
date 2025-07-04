@@ -3,13 +3,12 @@ cmake_minimum_required(VERSION 3.22)
 set(PROJECT_NAME kilate)
 project(${PROJECT_NAME} LANGUAGES C)
 
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
 option(BUILD_SHARED_LIBS "Build shared libraries (.so)" ON)
 option(BUILD_STATIC_LIBS "Build static libraries (.a)" ON)
 option(INSTALL "Install libkilate and executable." OFF)
 option(ASAN "Enable Address Sanitizer" OFF)
+
+add_compile_options(-Wall -Wextra -Wunused)
 
 if(ASAN)
   message(STATUS "AddressSanitizer enabled")
@@ -27,7 +26,6 @@ set(CMAKE_EXE_LINKER_FLAGS
 
 set(LIB_SOURCES
     src/environment.c
-    src/error.c
     src/file.c
     src/interpreter.c
     src/hashmap.c

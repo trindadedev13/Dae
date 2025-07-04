@@ -9,7 +9,7 @@
 
 typedef struct {
   klt_hashmap* functions;
-  klt_hashmap* nativeFunctions;
+  klt_hashmap* native_functions;
   klt_environment* env;
 } klt_interpreter;
 

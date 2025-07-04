@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>
 
 #include "kilate/error.h"
@@ -9,25 +8,25 @@
 #include "kilate/parser.h"
 #include "kilate/string.h"
 
-bool interpret(klt_str src) {
+klt_bool interpret(klt_str src) {
   klt_lexer* lexer = klt_lexer_make(src);
-  assert(lexer);
+  if (lexer == NULL)
+    klt_error_fatal("Lexer is null.");
   klt_lexer_tokenize(lexer);
 
   klt_native_init();
 
   klt_parser* parser = klt_parser_make(lexer->tokens);
-  assert(parser);
+  if (parser == NULL)
+    klt_error_fatal("Parser is null.");
 
   klt_parser_parse_program(parser);
 
   klt_interpreter* interpreter =
       klt_interpreter_make(parser->functions, native_functions);
-  assert(interpreter);
-
-  klt_interpreter_result result = klt_interpreter_run(interpreter);
-
-  assert(result.data);
+  if (interpreter == NULL)
+    klt_error_fatal("Interpreter is null.");
+  klt_interpreter_run(interpreter);
 
   klt_parser_delete(parser);
   klt_interpreter_delete(interpreter);
@@ -36,7 +35,7 @@ bool interpret(klt_str src) {
   return true;
 }
 
-bool Run(int argc, char* argv[]) {
+klt_bool run(int argc, char* argv[]) {
   if (argc < 2) {
     printf("Usage: %s <action> <file>\n", argv[0]);
     printf("Use %s help for more info.\n", argv[0]);
@@ -59,7 +58,7 @@ bool Run(int argc, char* argv[]) {
       klt_error_fatal("Failed to read %s", argv[2]);
       return false;
     }
-    bool interRes = interpret(src);
+    klt_bool interRes = interpret(src);
     free(src);
     klt_file_close(file);
     return interRes;
@@ -72,6 +71,6 @@ bool Run(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-  bool runRes = Run(argc, argv);
+  klt_bool runRes = run(argc, argv);
   return runRes ? 0 : 1;
 }
