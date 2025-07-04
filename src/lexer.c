@@ -196,11 +196,12 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
       continue;
     }
 
-    if (isalpha(c)) {
+    if (isalpha(c) || c == '_') {
       size_t start = lexer->__pos__;
       while (lexer->__pos__ < inputLen &&
              (isalpha(lexer->__input__[lexer->__pos__]) ||
-              isdigit(lexer->__input__[lexer->__pos__]))) {
+              isdigit(lexer->__input__[lexer->__pos__])) ||
+              lexer->__input__[lexer->__pos__] == '_') {
         klt_lexer_Advance(lexer);
       }
       klt_str word = klt_str_substring(lexer->__input__, start, lexer->__pos__);
