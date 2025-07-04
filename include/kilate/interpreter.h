@@ -1,16 +1,16 @@
 #ifndef __INTERPRETER_H__
 #define __INTERPRETER_H__
 
+#include "kilate/environment.h"
 #include "kilate/hashmap.h"
 #include "kilate/node.h"
-#include "kilate/scope_stack.h"
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
 typedef struct {
   klt_hashmap* functions;
   klt_hashmap* nativeFunctions;
-  klt_scope_stack* varStack;
+  klt_environment* env;
 } klt_interpreter;
 
 typedef enum { IRT_FUNC, IRT_RETURN } klt_interpreter_result_type;

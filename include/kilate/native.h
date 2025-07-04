@@ -1,14 +1,14 @@
 #ifndef __NATIVE_H__
 #define __NATIVE_H__
 
+#include "kilate/environment.h"
 #include "kilate/lexer.h"
 #include "kilate/node.h"
 #include "kilate/parser.h"
-#include "kilate/scope_stack.h"
 #include "kilate/vector.h"
 
 typedef struct {
-  klt_scope_stack* varStack;
+  klt_environment* env;
   klt_node_fnparam_vector* params;
 } klt_native_fndata;
 

@@ -3,15 +3,14 @@ work println(any: message) {
   print -> "\n"
 }
 
-work testVarsScope() {
-  // expected: Error!
-  println -> varInMain
+work testVarsScope(string: name) {
+  println -> name
 }
 
 work main(): bool {
-  let varInMain = "Opa"
-  println -> varInMain
-  testVarsScope()
+  let name = "Opa"
+  println -> name
+  testVarsScope -> name
   sleep -> 2000
   return -> true
 }

@@ -26,6 +26,7 @@ set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 
 set(LIB_SOURCES
+    src/environment.c
     src/error.c
     src/file.c
     src/interpreter.c
@@ -34,11 +35,11 @@ set(LIB_SOURCES
     src/node.c
     src/parser.c
     src/native.c
-    src/scope_stack.c
     src/string.c
     src/vector.c)
 
 set(HEADERS
+    include/kilate/environment.h
     include/kilate/error.h
     include/kilate/file.h
     include/kilate/hashmap.h
@@ -47,7 +48,6 @@ set(HEADERS
     include/kilate/node.h
     include/kilate/parser.h
     include/kilate/native.h
-    include/kilate/scope_stack.h
     include/kilate/string.h
     include/kilate/vector.h)
 

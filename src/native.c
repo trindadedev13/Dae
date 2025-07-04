@@ -127,7 +127,7 @@ klt_node* klt_native_print(klt_native_fndata* data) {
     klt_node_fnparam* param =
         *(klt_node_fnparam**)klt_vector_get(data->params, i);
     if (param->type == NODE_VALUE_TYPE_VAR) {
-      klt_node* var = klt_scope_stack_get(data->varStack, param->value);
+      klt_node* var = klt_environment_get(data->env, param->value);
       void* value = var->vardec_n.varValue;
       switch (var->vardec_n.varValueType) {
         case NODE_VALUE_TYPE_NUMBER: {
@@ -165,7 +165,7 @@ klt_node* klt_native_system(klt_native_fndata* data) {
     klt_node_fnparam* param =
         *(klt_node_fnparam**)klt_vector_get(data->params, i);
     if (param->type == NODE_VALUE_TYPE_VAR) {
-      klt_node* var = klt_scope_stack_get(data->varStack, param->value);
+      klt_node* var = klt_environment_get(data->env, param->value);
       void* value = var->vardec_n.varValue;
       switch (var->vardec_n.varValueType) {
         case NODE_VALUE_TYPE_STRING:
@@ -186,7 +186,7 @@ klt_node* klt_native_sleep(klt_native_fndata* data) {
   klt_node_fnparam* param =
         *(klt_node_fnparam**)klt_vector_get(data->params, 0);
   if (param->type == NODE_VALUE_TYPE_VAR) {
-    klt_node* var = klt_scope_stack_get(data->varStack, param->value);
+    klt_node* var = klt_environment_get(data->env, param->value);
     void* value = var->vardec_n.varValue;
     if (var->vardec_n.varValueType != NODE_VALUE_TYPE_NUMBER) {
       psleep((int)(intptr_t)param->value);
