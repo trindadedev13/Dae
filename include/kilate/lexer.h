@@ -14,7 +14,8 @@ typedef enum {
   TOKEN_RPAREN,      // )
   TOKEN_LBRACE,      // {
   TOKEN_RBRACE,      // }
-  TOKEN_ARROW,       // ->
+  TOKEN_RARROW,      // ->
+  TOKEN_LARROW,      // <-
   TOKEN_COLON,       // :
   TOKEN_TYPE,        // bool
   TOKEN_BOOL,        // true, false
@@ -44,8 +45,10 @@ static klt_str klt_tokentype_tostr(klt_token_type type) {
       return "left_brace";
     case TOKEN_RBRACE:
       return "right_brace";
-    case TOKEN_ARROW:
-      return "arrow";
+    case TOKEN_RARROW:
+      return "right_arrow";
+    case TOKEN_LARROW:
+      return "left_arrow";
     case TOKEN_COLON:
       return "colon";
     case TOKEN_TYPE:

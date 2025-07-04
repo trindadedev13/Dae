@@ -148,7 +148,16 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
     if (klt_str_starts_with(lexer->__input__, "->", lexer->__pos__)) {
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      klt_token* token = klt_token_make(TOKEN_ARROW, "->", tkl, tkc);
+      klt_token* token = klt_token_make(TOKEN_RARROW, "->", tkl, tkc);
+      klt_vector_push_back(lexer->tokens, &token);
+
+      lexer->__pos__ += 2;
+      continue;
+    }
+    if (klt_str_starts_with(lexer->__input__, "<-", lexer->__pos__)) {
+      size_t tkl = lexer->__line__;
+      size_t tkc = lexer->__column__;
+      klt_token* token = klt_token_make(TOKEN_LARROW, "->", tkl, tkc);
       klt_vector_push_back(lexer->tokens, &token);
 
       lexer->__pos__ += 2;

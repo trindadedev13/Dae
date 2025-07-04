@@ -195,7 +195,13 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
   if (klt_str_equals(token->text, "return")) {
     klt_parser_consume(parser, TOKEN_KEYWORD);
-    klt_parser_consume(parser, TOKEN_ARROW);
+    klt_token* arrow =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+    if (arrow->type == TOKEN_RARROW) {
+      klt_parser_consume(parser, TOKEN_RARROW);
+    } else if (arrow->type == TOKEN_LARROW) {
+      klt_parser_consume(parser, TOKEN_LARROW);
+    }
     klt_token* next =
         *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
     void* value;
@@ -395,8 +401,8 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
     }
 
     // call with ->
-    if (next->type == TOKEN_ARROW) {
-      klt_parser_consume(parser, TOKEN_ARROW);
+    if (next->type == TOKEN_RARROW || next->type == TOKEN_LARROW) {
+      klt_parser_consume(parser, next->type);
       klt_node_fnparam_vector* params =
           klt_vector_make(sizeof(klt_node_fnparam_vector*));
 
