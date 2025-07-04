@@ -23,6 +23,10 @@ void klt_str_concat(klt_str, klt_str);
 
 int klt_str_to_int(klt_str);
 
+float klt_str_to_float(klt_str);
+
+long klt_str_to_long(klt_str);
+
 klt_str klt_str_format(const klt_str, ...);
 
 klt_str klt_str_interpret_escapes(klt_str);

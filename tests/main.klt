@@ -1,16 +1,14 @@
-work println(any: message) {
-  print -> message
-  print -> "\n"
-}
-
-work testVarsScope(string: name) {
-  println -> name
-}
-
 work main(): bool {
-  let name = "Opa"
-  println -> name
-  testVarsScope -> name
-  sleep -> 2000
+  // let name = "Opa"
+  // let a = 2
+  // let b = 2.5
+  // let c = 2.5l
+  // println -> name,""
+  // println -> "i:", a
+  // println -> "f:", b
+  // println -> "l:", c
+  // print -> "ld:"
+  long lg = 15l
+  print -> lg, "\n"
   return -> true
 }

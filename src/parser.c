@@ -102,8 +102,12 @@ klt_str klt_parser_tokentype_to_str(klt_token_type type) {
       return "string";
     case TOKEN_BOOL:
       return "bool";
-    case TOKEN_NUMBER:
-      return "number";
+    case TOKEN_INT:
+      return "int";
+    case TOKEN_FLOAT:
+      return "float";
+    case TOKEN_LONG:
+      return "long";
     default:
       return "unknow";
   }
@@ -111,8 +115,12 @@ klt_str klt_parser_tokentype_to_str(klt_token_type type) {
 
 klt_str klt_parser_nodevaluetype_to_str(klt_node_valuetype type) {
   switch (type) {
-    case NODE_VALUE_TYPE_NUMBER:
-      return "number";
+    case NODE_VALUE_TYPE_INT:
+      return "int";
+    case NODE_VALUE_TYPE_FLOAT:
+      return "float";
+    case NODE_VALUE_TYPE_LONG:
+      return "long";
     case NODE_VALUE_TYPE_STRING:
       return "string";
     case NODE_VALUE_TYPE_BOOL:
@@ -133,8 +141,12 @@ klt_node_valuetype klt_parser_tokentype_to_nodevaluetype(klt_parser* parser,
       return NODE_VALUE_TYPE_STRING;
     case TOKEN_BOOL:
       return NODE_VALUE_TYPE_BOOL;
-    case TOKEN_NUMBER:
-      return NODE_VALUE_TYPE_NUMBER;
+    case TOKEN_INT:
+      return NODE_VALUE_TYPE_INT;
+    case TOKEN_FLOAT:
+      return NODE_VALUE_TYPE_FLOAT;
+    case TOKEN_LONG:
+      return NODE_VALUE_TYPE_LONG;
     case TOKEN_IDENTIFIER: {
       klt_token* next =
           *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
@@ -163,8 +175,12 @@ klt_node_valuetype klt_parser_str_to_nodevaluetype(klt_str value) {
     return NODE_VALUE_TYPE_STRING;
   } else if (ct("bool")) {
     return NODE_VALUE_TYPE_BOOL;
-  } else if (ct("number")) {
-    return NODE_VALUE_TYPE_NUMBER;
+  } else if (ct("int")) {
+    return NODE_VALUE_TYPE_INT;
+  } else if (ct("float")) {
+    return NODE_VALUE_TYPE_FLOAT;
+  } else if (ct("long")) {
+    return NODE_VALUE_TYPE_LONG;
   } else {
     return NODE_VALUE_TYPE_ANY;
   }
@@ -191,10 +207,20 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
         rawBool = true;
       value = (void*)(intptr_t)rawBool;
       type = NODE_VALUE_TYPE_BOOL;
-    } else if (next->type == TOKEN_NUMBER) {
+    } else if (next->type == TOKEN_INT) {
       value = (void*)(intptr_t)klt_str_to_int(
-          klt_parser_consume(parser, TOKEN_NUMBER)->text);
-      type = NODE_VALUE_TYPE_NUMBER;
+          klt_parser_consume(parser, TOKEN_INT)->text);
+      type = NODE_VALUE_TYPE_INT;
+    } else if (next->type == TOKEN_FLOAT) {
+      float fval =
+          klt_str_to_float(klt_parser_consume(parser, TOKEN_FLOAT)->text);
+      value = malloc(sizeof(float));
+      memcpy(value, &fval, sizeof(float));
+      type = NODE_VALUE_TYPE_FLOAT;
+    } else if (next->type == TOKEN_LONG) {
+      long lval = klt_str_to_long(klt_parser_consume(parser, TOKEN_LONG)->text);
+      value = (void*)(intptr_t)lval;
+      type = NODE_VALUE_TYPE_LONG;
     } else if (next->type == TOKEN_STRING) {
       value = klt_parser_consume(parser, TOKEN_STRING)->text;
       type = NODE_VALUE_TYPE_STRING;
@@ -228,12 +254,20 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
     if (varValueTk->type == TOKEN_STRING) {
       varValue = klt_parser_consume(parser, TOKEN_STRING)->text;
       varValueType = NODE_VALUE_TYPE_STRING;
-      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
-    } else if (varValueTk->type == TOKEN_NUMBER) {
-      int temp = klt_str_to_int(klt_parser_consume(parser, TOKEN_NUMBER)->text);
+    } else if (varValueTk->type == TOKEN_INT) {
+      int temp = klt_str_to_int(klt_parser_consume(parser, TOKEN_INT)->text);
       varValue = (void*)(intptr_t)temp;
-      varValueType = NODE_VALUE_TYPE_NUMBER;
-      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
+      varValueType = NODE_VALUE_TYPE_INT;
+    } else if (varValueTk->type == TOKEN_FLOAT) {
+      float fval =
+          klt_str_to_float(klt_parser_consume(parser, TOKEN_FLOAT)->text);
+      varValue = malloc(sizeof(float));
+      memcpy(varValue, &fval, sizeof(float));
+      varValueType = NODE_VALUE_TYPE_FLOAT;
+    } else if (varValueTk->type == TOKEN_LONG) {
+      long lval = klt_str_to_long(klt_parser_consume(parser, TOKEN_LONG)->text);
+      varValue = (void*)(intptr_t)lval;
+      varValueType = NODE_VALUE_TYPE_LONG;
     } else if (varValueTk->type == TOKEN_BOOL) {
       bool rawBool = false;
       klt_str boolStr = klt_parser_consume(parser, TOKEN_BOOL)->text;
@@ -241,7 +275,6 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
         rawBool = true;
       varValue = (void*)(intptr_t)rawBool;
       varValueType = NODE_VALUE_TYPE_BOOL;
-      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
     } else if (varValueTk->type == TOKEN_IDENTIFIER) {
       varValue = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
       klt_token* next =
@@ -251,9 +284,9 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       } else {
         varValueType = NODE_VALUE_TYPE_VAR;
       }
-      varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
       parser->__pos__ += 2;
     }
+    varInferredType = klt_parser_nodevaluetype_to_str(varValueType);
     return klt_var_dec_node_make(varName, varInferredType, varValueType,
                                  varValue);
   } else if (token->type == TOKEN_TYPE) {
@@ -270,11 +303,22 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       valueTk = klt_parser_consume(parser, TOKEN_STRING);
       varValue = valueTk->text;
       varValueType = NODE_VALUE_TYPE_STRING;
-    } else if (valueTk->type == TOKEN_NUMBER) {
-      valueTk = klt_parser_consume(parser, TOKEN_NUMBER);
+    } else if (valueTk->type == TOKEN_INT) {
+      valueTk = klt_parser_consume(parser, TOKEN_INT);
       int temp = klt_str_to_int(valueTk->text);
       varValue = (void*)(intptr_t)temp;
-      varValueType = NODE_VALUE_TYPE_NUMBER;
+      varValueType = NODE_VALUE_TYPE_INT;
+    } else if (valueTk->type == TOKEN_FLOAT) {
+      valueTk = klt_parser_consume(parser, TOKEN_FLOAT);
+      float fval = klt_str_to_float(valueTk->text);
+      varValue = malloc(sizeof(float));
+      memcpy(varValue, &fval, sizeof(float));
+      varValueType = NODE_VALUE_TYPE_FLOAT;
+    } else if (valueTk->type == TOKEN_LONG) {
+      valueTk = klt_parser_consume(parser, TOKEN_LONG);
+      long lval = klt_str_to_long(valueTk->text);
+      varValue = (void*)(intptr_t)lval;
+      varValueType = NODE_VALUE_TYPE_LONG;
     } else if (valueTk->type == TOKEN_BOOL) {
       valueTk = klt_parser_consume(parser, TOKEN_BOOL);
       klt_str boolStr = valueTk->text;
@@ -282,7 +326,7 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       varValue = (void*)(intptr_t)bval;
       varValueType = NODE_VALUE_TYPE_BOOL;
     } else if (valueTk->type == TOKEN_IDENTIFIER) {
-      valueTk = klt_parser_consume(parser, TOKEN_NUMBER);
+      valueTk = klt_parser_consume(parser, TOKEN_IDENTIFIER);
       klt_str name = valueTk->text;
       klt_token* next =
           *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
@@ -361,7 +405,8 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
             *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
         if (param->type != TOKEN_STRING && param->type != TOKEN_BOOL &&
-            param->type != TOKEN_NUMBER && param->type != TOKEN_IDENTIFIER) {
+            param->type != TOKEN_INT && param->type != TOKEN_FLOAT &&
+            param->type != TOKEN_LONG && param->type != TOKEN_IDENTIFIER) {
           break;
         }
 
@@ -492,8 +537,12 @@ klt_node* klt_parser_parse_function(klt_parser* parser) {
             "Function '%s' must end with return statement.", name);
       }
       klt_node_valuetype retType;
-      if (klt_str_equals(returnType, "number")) {
-        retType = NODE_VALUE_TYPE_NUMBER;
+      if (klt_str_equals(returnType, "int")) {
+        retType = NODE_VALUE_TYPE_INT;
+      } else if (klt_str_equals(returnType, "float")) {
+        retType = NODE_VALUE_TYPE_FLOAT;
+      } else if (klt_str_equals(returnType, "long")) {
+        retType = NODE_VALUE_TYPE_LONG;
       } else if (klt_str_equals(returnType, "string")) {
         retType = NODE_VALUE_TYPE_STRING;
       } else if (klt_str_equals(returnType, "bool")) {

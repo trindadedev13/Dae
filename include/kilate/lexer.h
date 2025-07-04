@@ -18,7 +18,9 @@ typedef enum {
   TOKEN_COLON,       // :
   TOKEN_TYPE,        // bool
   TOKEN_BOOL,        // true, false
-  TOKEN_NUMBER,      // number 1 2 3..
+  TOKEN_INT,         // 123
+  TOKEN_FLOAT,       // 1.23
+  TOKEN_LONG,        // 123l
   TOKEN_COMMA,       // ,,
   TOKEN_ASSIGN,      // =
   TOKEN_VAR,         // var
@@ -50,8 +52,12 @@ static klt_str klt_tokentype_tostr(klt_token_type type) {
       return "type";
     case TOKEN_BOOL:
       return "boolean";
-    case TOKEN_NUMBER:
-      return "number";
+    case TOKEN_INT:
+      return "int";
+    case TOKEN_FLOAT:
+      return "float";
+    case TOKEN_LONG:
+      return "double";
     case TOKEN_COMMA:
       return "comma";
     case TOKEN_ASSIGN:

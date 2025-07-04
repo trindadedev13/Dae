@@ -76,6 +76,18 @@ int klt_str_to_int(const klt_str src) {
   return sign * num;
 }
 
+float klt_str_to_float(klt_str s) {
+  if (s == NULL)
+    return 0.0f;
+  return strtof(s, NULL);
+}
+
+long klt_str_to_long(klt_str s) {
+  if (s == NULL)
+    return 0;
+  return strtol(s, NULL, 10);
+}
+
 klt_str klt_str_format(const klt_str fmt, ...) {
   va_list args;
   va_start(args, fmt);

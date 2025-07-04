@@ -178,19 +178,44 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
     }
     if (isdigit(c)) {
       size_t start = lexer->__pos__;
-      while (lexer->__pos__ < inputLen &&
-             isdigit(lexer->__input__[lexer->__pos__])) {
-        klt_lexer_Advance(lexer);
-        lexer->__line__++;
+      bool has_dot = false;
+      while (lexer->__pos__ < inputLen) {
+        char ch = lexer->__input__[lexer->__pos__];
+        if (isdigit(ch)) {
+          klt_lexer_Advance(lexer);
+        } else if (ch == '.' && !has_dot) {
+          has_dot = true;
+          klt_lexer_Advance(lexer);
+        } else {
+          break;
+        }
       }
+
+      bool is_long = false;
+      if (lexer->__pos__ < inputLen &&
+          (lexer->__input__[lexer->__pos__] == 'l' ||
+           lexer->__input__[lexer->__pos__] == 'L')) {
+        is_long = true;
+        klt_lexer_Advance(lexer);
+      }
+
       klt_str number =
           klt_str_substring(lexer->__input__, start, lexer->__pos__);
       if (number == NULL) {
         klt_lexer_error(lexer, "Failed to extract number");
       }
+
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      klt_token* token = klt_token_make(TOKEN_NUMBER, number, tkl, tkc);
+      klt_token_type numType = TOKEN_INT;
+
+      if (is_long) {
+        numType = TOKEN_LONG;
+      } else if (has_dot) {
+        numType = TOKEN_FLOAT;
+      }
+
+      klt_token* token = klt_token_make(numType, number, tkl, tkc);
       klt_vector_push_back(lexer->tokens, &token);
       free(number);
       continue;
@@ -220,8 +245,9 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
         klt_token* token = klt_token_make(TOKEN_BOOL, word, tkl, tkc);
         klt_vector_push_back(lexer->tokens, &token);
 
-      } else if (klt_str_equals(word, "bool") ||
-                 klt_str_equals(word, "number") ||
+      } else if (klt_str_equals(word, "bool") || klt_str_equals(word, "int") ||
+                 klt_str_equals(word, "float") ||
+                 klt_str_equals(word, "long") ||
                  klt_str_equals(word, "string") ||
                  klt_str_equals(word, "any")) {
         klt_token* token = klt_token_make(TOKEN_TYPE, word, tkl, tkc);

@@ -5,7 +5,7 @@
         {builtin: #C_QUOTED_STRING#}
         {builtin: #C_NUMBER#}
         {match: keywordsToRegex(
-                "work return false true bool string number let"
+                "work return false true bool string int float long let"
                 "var any"
             ), 0: "keyword"}
     ]

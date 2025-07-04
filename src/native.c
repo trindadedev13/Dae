@@ -91,7 +91,7 @@ void klt_native_register_all_functions() {
   {
     // Register native system method
     klt_str_vector* requiredParams = klt_vector_make(sizeof(klt_str*));
-    klt_str str = "number";
+    klt_str str = "long";
     klt_vector_push_back(requiredParams, &str);
     klt_native_register_fn("sleep", requiredParams, klt_native_sleep);
   }
@@ -130,8 +130,16 @@ klt_node* klt_native_print(klt_native_fndata* data) {
       klt_node* var = klt_environment_get(data->env, param->value);
       void* value = var->vardec_n.varValue;
       switch (var->vardec_n.varValueType) {
-        case NODE_VALUE_TYPE_NUMBER: {
+        case NODE_VALUE_TYPE_INT: {
           printf("%d", (int)(intptr_t)value);
+          break;
+        }
+        case NODE_VALUE_TYPE_FLOAT: {
+          printf("%f", *(float*)value);
+          break;
+        }
+        case NODE_VALUE_TYPE_LONG: {
+          printf("%ld", (long)(intptr_t)value);
           break;
         }
         case NODE_VALUE_TYPE_STRING:
@@ -188,7 +196,7 @@ klt_node* klt_native_sleep(klt_native_fndata* data) {
   if (param->type == NODE_VALUE_TYPE_VAR) {
     klt_node* var = klt_environment_get(data->env, param->value);
     void* value = var->vardec_n.varValue;
-    if (var->vardec_n.varValueType != NODE_VALUE_TYPE_NUMBER) {
+    if (var->vardec_n.varValueType != NODE_VALUE_TYPE_INT) {
       psleep((int)(intptr_t)param->value);
     }
   }
