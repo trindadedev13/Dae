@@ -26,6 +26,7 @@ set(CMAKE_EXE_LINKER_FLAGS
 
 set(LIB_SOURCES
     src/environment.c
+    src/error.c
     src/file.c
     src/interpreter.c
     src/hashmap.c
