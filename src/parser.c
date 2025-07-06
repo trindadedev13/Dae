@@ -432,7 +432,6 @@ void klt_parser_fn_validate_params(klt_node* fn,
 
 klt_node* klt_parser_parse_call_node(klt_parser* parser, klt_token* token) {
   klt_str name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
-  printf("Name: %s\n", name);
   klt_token* next =
       *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
