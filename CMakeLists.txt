@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME kilate)
-project(${PROJECT_NAME} LANGUAGES C)
+project(${PROJECT_NAME} LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.so)" ON)
 option(BUILD_STATIC_LIBS "Build static libraries (.a)" ON)
@@ -35,7 +35,8 @@ set(LIB_SOURCES
     src/parser.c
     src/native.c
     src/string.c
-    src/vector.c)
+    src/vector.c
+    src/cpp/native.cpp)
 
 set(HEADERS
     include/kilate/environment.h
@@ -48,7 +49,8 @@ set(HEADERS
     include/kilate/parser.h
     include/kilate/native.h
     include/kilate/string.h
-    include/kilate/vector.h)
+    include/kilate/vector.h
+    include/kilate/cpp/native.hpp)
 
 set(EXE_SOURCES
     src/main.c)
@@ -104,7 +106,9 @@ if(INSTALL)
 
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.h")
+    FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.hpp")
 
   install(EXPORT ${PROJECT_NAME}Targets
     NAMESPACE Kilate::
