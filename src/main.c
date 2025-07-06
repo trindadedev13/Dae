@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "kilate/error.h"
 #include "kilate/file.h"
