@@ -6,7 +6,7 @@
         {builtin: #C_NUMBER#}
         {match: keywordsToRegex(
                 "work return false true bool string int float long let"
-                "var any"
+                "var any import"
             ), 0: "keyword"}
     ]
 }

@@ -294,7 +294,8 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
       }
       size_t tkl = lexer->__line__;
       size_t tkc = lexer->__column__;
-      if (klt_str_equals(word, "work") || klt_str_equals(word, "return")) {
+      if (klt_str_equals(word, "work") || klt_str_equals(word, "return") ||
+          klt_str_equals(word, "import")) {
         klt_token* token = klt_token_make(TOKEN_KEYWORD, word, tkl, tkc);
         klt_vector_push_back(lexer->tokens, &token);
 

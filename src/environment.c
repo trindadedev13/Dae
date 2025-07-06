@@ -25,6 +25,9 @@ void klt_environment_destroy(klt_environment* env) {
   while (current) {
     klt_env_entry* next = current->next;
     free(current->name);
+    if (current->value) {
+      klt_node_delete((klt_node*)current->value);
+    }
     free(current);
     current = next;
   }

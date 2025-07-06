@@ -11,7 +11,7 @@
 
 typedef struct {
   klt_token_vector* tokens;
-  klt_node_vector* functions;
+  klt_node_vector* nodes;
   size_t __pos__;
 } klt_parser;
 
@@ -43,6 +43,8 @@ void klt_parser_fn_validate_params(klt_node*,
                                    klt_token*);
 
 klt_node* klt_parser_parse_call_node(klt_parser*, klt_token*);
+
+klt_node* klt_parser_parse_import(klt_parser*);
 
 void klt_parser_parse_program(klt_parser*);
 

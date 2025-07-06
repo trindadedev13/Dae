@@ -1,0 +1,8 @@
+work println(any: v) {
+  print -> v
+  print -> "\n"
+}
+
+work print_name(string: name) {
+  print -> "Your name is: ", name, "\n"
+}

@@ -5,15 +5,16 @@
 
 #include "kilate/environment.h"
 #include "kilate/error.h"
+#include "kilate/file.h"
 #include "kilate/hashmap.h"
 #include "kilate/node.h"
 #include "kilate/parser.h"
 
 klt_interpreter* klt_interpreter_make(
-    klt_node_vector* functions_nodes_vector,
+    klt_node_vector* nodes_vector,
     klt_node_vector* native_functions_nodes_vector) {
-  if (functions_nodes_vector == NULL)
-    klt_error_fatal("Functions Node's Vector is invalid.");
+  if (nodes_vector == NULL)
+    klt_error_fatal("Node's Vector is invalid.");
   if (native_functions_nodes_vector == NULL)
     klt_error_fatal("Native Functions Node's Vector is invalid.");
 
@@ -22,8 +23,8 @@ klt_interpreter* klt_interpreter_make(
   interpreter->native_functions = klt_hash_map_make(sizeof(klt_native_fn));
 
   // register all funcs
-  for (size_t i = 0; i < functions_nodes_vector->size; i++) {
-    klt_node** nodePtr = (klt_node**)klt_vector_get(functions_nodes_vector, i);
+  for (size_t i = 0; i < nodes_vector->size; i++) {
+    klt_node** nodePtr = (klt_node**)klt_vector_get(nodes_vector, i);
     if (nodePtr != NULL) {
       klt_node* node = *nodePtr;
       if (node->type == NODE_FUNCTION) {
@@ -192,9 +193,6 @@ klt_interpreter_result klt_interpreter_run_node(klt_interpreter* self,
     }
 
     case NODE_VARDEC: {
-      /*printf("[DEBUG] Declaring variable '%s' of type '%s' with value '%s'\n",
-             node->vardec_n.var_name, node->vardec_n.var_type,
-             (klt_str)node->vardec_n.var_value);*/
       klt_environment_define(self->env, node->vardec_n.var_name, node);
       return (klt_interpreter_result){.type = IRT_FUNC, .data = NULL};
     }

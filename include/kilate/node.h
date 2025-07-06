@@ -7,10 +7,10 @@
 
 typedef enum {
   NODE_FUNCTION,
-  NODE_PRINT,
   NODE_CALL,
   NODE_RETURN,
-  NODE_VARDEC
+  NODE_VARDEC,
+  NODE_IMPORT
 } klt_nodetype;
 
 typedef enum {
@@ -29,7 +29,6 @@ typedef klt_vector klt_node_vector;
 
 typedef struct {
   klt_str value;
-  // klt_str typeStr;
   klt_node_valuetype type;
 } klt_node_fnparam;
 
@@ -61,7 +60,19 @@ struct klt_node {
     klt_node_valuetype var_value_type;
     void* var_value;
   } vardec_n;
+
+  struct {
+    klt_str import_path;
+  } import_n;
 };
+
+void klt_node_delete(klt_node*);
+
+klt_node* klt_node_copy(klt_node*);
+
+klt_node_fnparam* klt_node_fnparam_copy(klt_node_fnparam*);
+
+void klt_node_delete_params(klt_node_fnparam_vector*);
 
 klt_node* klt_function_node_make(klt_str,
                                  klt_str,
@@ -73,5 +84,7 @@ klt_node* klt_call_node_make(klt_str, klt_node_fnparam_vector*);
 klt_node* klt_return_node_make(klt_node_valuetype, void*);
 
 klt_node* klt_var_dec_node_make(klt_str, klt_str, klt_node_valuetype, void*);
+
+klt_node* klt_import_node_make(klt_str);
 
 #endif

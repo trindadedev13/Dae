@@ -1,5 +1,7 @@
+import "utils.klt"
+
 work main(): bool {
-  print -> "ayo"
-  print -> "\n"
+  println -> "ayo"
+  print_name -> "Aquiles"
   return -> true
 }
