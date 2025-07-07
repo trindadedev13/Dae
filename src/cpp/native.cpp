@@ -11,7 +11,9 @@ extern "C" {
 }
 
 namespace kilate {
+
 namespace native {
+
 std::string getFnDataString(klt_native_fndata* data, size_t index) {
   if (index >= data->params->size)
     return "";
@@ -156,11 +158,15 @@ klt_native_fnentry* createFnEntry(const std::string& name,
   return entry;
 }
 }  // namespace native
+
 namespace node {
+
 klt_node* createReturnNode(klt_node_valuetype type, void* value) {
   return klt_return_node_make(type, value);
 }
+
 }  // namespace node
+
 }  // namespace kilate
 
 #endif

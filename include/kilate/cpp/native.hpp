@@ -11,7 +11,9 @@ extern "C" {
 }
 
 namespace kilate {
+
 namespace native {
+
 /** These methods also checks the 'var' type. */
 /** Returns a string value from a param in klt_native_fndata */
 std::string getFnDataString(klt_native_fndata* data, size_t index);
@@ -32,8 +34,11 @@ klt_native_fnentry* createFnEntry(const std::string& name,
                                   klt_native_fn fn);
 }  // namespace native
 namespace node {
+
 klt_node* createReturnNode(klt_node_valuetype return_type, void* return_value);
+
 }
+
 }  // namespace kilate
 
 #endif
