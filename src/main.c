@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "kilate/error.h"
+#include "kilate/config.h"
 #include "kilate/file.h"
 #include "kilate/interpreter.h"
 #include "kilate/lexer.h"
@@ -9,6 +10,10 @@
 #include "kilate/parser.h"
 #include "kilate/string.h"
 #include "kilate/vector.h"
+
+klt_vector* files = NULL;
+klt_vector* libs_directories = NULL;
+klt_vector* libs_native_directories = NULL;
 
 klt_bool interpret(klt_str src) {
   klt_lexer* lexer = klt_lexer_make(src);
@@ -48,8 +53,8 @@ klt_bool run(int argc, char* argv[]) {
     printf("Usage:\n");
     printf("  %s run <file(s)> [-I<path>] [-l<lib>]\n", argv[0]);
     printf("Options:\n");
-    printf("  -l<path>   Link Kilate Library path\n");
-    printf("  -ln<lib>    Link Kilate NATIVE Library library\n");
+    printf("  -L<path>    Kilate Libraries path\n");
+    printf("  -LN<path>   Kilate Native Libraries path\n");
     return true;
   }
 
@@ -58,25 +63,43 @@ klt_bool run(int argc, char* argv[]) {
     return false;
   }
 
-  klt_vector* files = klt_vector_make(sizeof(klt_str));
-  klt_vector* libs = klt_vector_make(sizeof(klt_str));
-  klt_vector* libs_native = klt_vector_make(sizeof(klt_str));
+  files = klt_vector_make(sizeof(klt_str));
+  libs_directories = klt_vector_make(sizeof(klt_str));
+  libs_native_directories = klt_vector_make(sizeof(klt_str));
+  {
+    const klt_str PREFIX = getenv("PREFIX");
+    if (PREFIX != NULL) {
+      char path[512];
+      snprintf(path, sizeof(path), "%s/kilate/libs/", PREFIX);
+      klt_str dup = strdup(path);
+      klt_vector_push_back(libs_directories, &dup);
+    }
+  }
+  {
+    const klt_str PREFIX = getenv("PREFIX");
+    if (PREFIX != NULL) {
+      char path[512];
+      snprintf(path, sizeof(path), "%s/kilate/native_libs/", PREFIX);
+      klt_str dup = strdup(path);
+      klt_vector_push_back(libs_native_directories, &dup);
+    }
+  }
 
   for (int i = 2; i < argc; i++) {
     char* arg = argv[i];
     if (arg[0] == '-') {
-      if (arg[1] == 'l') {
+      if (strncmp(arg, "-LN", 3) == 0) {
+        klt_str dup = strdup(&arg[3]);
+        klt_vector_push_back(libs_native_directories, &dup);
+      } else if (strncmp(arg, "-L", 2) == 0) {
         klt_str dup = strdup(&arg[2]);
-        klt_vector_push_back(libs, &dup);
-      } else if (strncmp(arg, "-nl", 3) == 0) {
-        klt_str dup = strdup(&arg[2]);
-        klt_vector_push_back(libs_native, &dup);
+        klt_vector_push_back(libs_directories, &dup);
       } else {
         printf("Unknown option: %s\n", arg);
         return false;
       }
     } else {
-      klt_str dup = strdup(arg);
+      klt_str dup = strdup(arg);;
       klt_vector_push_back(files, &dup);
     }
   }
@@ -112,20 +135,20 @@ klt_bool run(int argc, char* argv[]) {
       return false;
   }
 
-  for (size_t i = 0; i < libs->size; ++i) {
-    klt_str lib = *(klt_str*)klt_vector_get(libs, i);
+  for (size_t i = 0; i < libs_directories->size; ++i) {
+    klt_str lib = *(klt_str*)klt_vector_get(libs_directories, i);
     // do something here soon
     free(lib);
   }
 
-  for (size_t i = 0; i < libs_native->size; ++i) {
-    klt_str lib = *(klt_str*)klt_vector_get(libs_native, i);
+  for (size_t i = 0; i < libs_native_directories->size; ++i) {
+    klt_str lib = *(klt_str*)klt_vector_get(libs_native_directories, i);
     // do something here soon
     free(lib);
   }
 
-  klt_vector_delete(libs);
-  klt_vector_delete(libs_native);
+  klt_vector_delete(libs_directories);
+  klt_vector_delete(libs_native_directories);
   klt_vector_delete(files);
 
   return true;

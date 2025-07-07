@@ -25,7 +25,6 @@ float getFnDataFloat(klt_native_fndata* data, size_t index, bool* ok = nullptr);
 long getFnDataLong(klt_native_fndata* data, size_t index, bool* ok = nullptr);
 /** Returns a bool value from a param in klt_native_fndata */
 bool getFnDataBool(klt_native_fndata* data, size_t index, bool* ok = nullptr);
-
 /** Adds a param in params vector */
 void addParam(klt_str_vector* params, const std::string& param);
 /** Creates a klt_native_fnentry */

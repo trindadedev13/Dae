@@ -118,7 +118,8 @@ klt_interpreter_result klt_interpreter_run_fn(klt_interpreter* self,
       klt_node* var = klt_var_dec_node_make(
           fnParam->value, klt_parser_nodevaluetype_to_str(fnParam->type),
           actualType, actualValue);
-      klt_environment_define(self->env, var->vardec_n.var_name, var);
+      klt_node* var_copy = klt_node_copy(var);
+      klt_environment_define(self->env, var_copy->vardec_n.var_name, var_copy);
     }
   }
 
@@ -193,7 +194,7 @@ klt_interpreter_result klt_interpreter_run_node(klt_interpreter* self,
     }
 
     case NODE_VARDEC: {
-      klt_environment_define(self->env, node->vardec_n.var_name, node);
+      klt_environment_define(self->env, node->vardec_n.var_name, klt_node_copy(node));
       return (klt_interpreter_result){.type = IRT_FUNC, .data = NULL};
     }
 

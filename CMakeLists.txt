@@ -9,6 +9,7 @@ option(INSTALL "Install libkilate and executable." OFF)
 option(ASAN "Enable Address Sanitizer" OFF)
 
 add_compile_options(-Wall -Wextra -Wunused)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 
 if(ASAN)
   message(STATUS "AddressSanitizer enabled")
@@ -53,8 +54,8 @@ set(HEADERS
     include/kilate/cpp/native.hpp)
 
 set(EXE_SOURCES
-    src/main.c)
-
+    src/main.c
+    src/cpp/native.cpp)
 
 if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}_shared SHARED ${LIB_SOURCES} ${HEADERS})

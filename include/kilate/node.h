@@ -21,6 +21,7 @@ typedef enum {
   NODE_VALUE_TYPE_BOOL,
   NODE_VALUE_TYPE_VAR,
   NODE_VALUE_TYPE_FUNC,
+  NODE_VALUE_TYPE_CALL,
   NODE_VALUE_TYPE_ANY
 } klt_node_valuetype;
 

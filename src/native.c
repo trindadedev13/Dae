@@ -15,6 +15,7 @@
 #define psleep(ms) usleep(ms * 1000)
 #endif
 
+#include "kilate/config.h"
 #include "kilate/lexer.h"
 #include "kilate/node.h"
 #include "kilate/string.h"
@@ -29,37 +30,36 @@ void klt_native_init() {
 }
 
 void klt_native_load_extern() {
-  klt_str dir;
-  if ((dir = getenv("KLT_SO_DIRS")) == NULL) {
-    dir = ".";
-  }
+  // Load ALL Native Libs found
+  for (size_t i = 0; i < libs_native_directories->size; i++) {
+    klt_str dir = *(klt_str*) klt_vector_get(libs_native_directories, i);
+    DIR* d = opendir(dir);
+    if (!d)
+      return;
 
-  DIR* d = opendir(dir);
-  if (!d)
-    return;
+    struct dirent* entry;
+    while ((entry = readdir(d))) {
+      if (strstr(entry->d_name, ".so")) {
+        char path[512];
+        snprintf(path, sizeof(path), "%s%s", dir, entry->d_name);
 
-  struct dirent* entry;
-  while ((entry = readdir(d))) {
-    if (strstr(entry->d_name, ".so")) {
-      char path[512];
-      snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
+        void* handle = dlopen(path, RTLD_NOW);
+        if (!handle) {
+          fprintf(stderr, "Error loading %s: %s\n", path, dlerror());
+          continue;
+        }
 
-      void* handle = dlopen(path, RTLD_NOW);
-      if (!handle) {
-        fprintf(stderr, "Error loading %s: %s\n", path, dlerror());
-        continue;
+        void (*extern_native_init)() = dlsym(handle, "KILATE_NATIVE_REGISTER");
+        if (!extern_native_init) {
+          fprintf(stderr, "Function KILATE_NATIVE_REGISTER not found in %s\n",
+                  path);
+          continue;
+        }
+        extern_native_init();
       }
-
-      void (*extern_native_init)() = dlsym(handle, "KILATE_NATIVE_REGISTER");
-      if (!extern_native_init) {
-        fprintf(stderr, "Function KILATE_NATIVE_REGISTER not found in %s\n",
-                path);
-        continue;
-      }
-      extern_native_init();
     }
+    closedir(d);
   }
-  closedir(d);
 }
 
 void klt_native_end() {
