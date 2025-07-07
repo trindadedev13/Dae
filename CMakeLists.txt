@@ -26,6 +26,7 @@ set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 
 set(LIB_SOURCES
+    src/config.c
     src/environment.c
     src/error.c
     src/file.c
@@ -40,6 +41,7 @@ set(LIB_SOURCES
     src/cpp/native.cpp)
 
 set(HEADERS
+    include/kilate/config.h
     include/kilate/environment.h
     include/kilate/error.h
     include/kilate/file.h

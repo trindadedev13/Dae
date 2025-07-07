@@ -11,10 +11,6 @@
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
-klt_vector* files = NULL;
-klt_vector* libs_directories = NULL;
-klt_vector* libs_native_directories = NULL;
-
 klt_bool interpret(klt_str src) {
   klt_lexer* lexer = klt_lexer_make(src);
   if (lexer == NULL)
@@ -63,9 +59,7 @@ klt_bool run(int argc, char* argv[]) {
     return false;
   }
 
-  files = klt_vector_make(sizeof(klt_str));
-  libs_directories = klt_vector_make(sizeof(klt_str));
-  libs_native_directories = klt_vector_make(sizeof(klt_str));
+  // Config
   {
     const klt_str PREFIX = getenv("PREFIX");
     if (PREFIX != NULL) {
@@ -128,33 +122,18 @@ klt_bool run(int argc, char* argv[]) {
 
     klt_bool interRes = interpret(src);
     free(src);
-    free(filename);
     klt_file_close(file);
 
     if (!interRes)
       return false;
   }
 
-  for (size_t i = 0; i < libs_directories->size; ++i) {
-    klt_str lib = *(klt_str*)klt_vector_get(libs_directories, i);
-    // do something here soon
-    free(lib);
-  }
-
-  for (size_t i = 0; i < libs_native_directories->size; ++i) {
-    klt_str lib = *(klt_str*)klt_vector_get(libs_native_directories, i);
-    // do something here soon
-    free(lib);
-  }
-
-  klt_vector_delete(libs_directories);
-  klt_vector_delete(libs_native_directories);
-  klt_vector_delete(files);
-
   return true;
 }
 
 int main(int argc, char* argv[]) {
+  klt_config_init();
   klt_bool runRes = run(argc, argv);
+  klt_config_end();
   return runRes ? 0 : 1;
 }
