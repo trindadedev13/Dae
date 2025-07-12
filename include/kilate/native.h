@@ -7,6 +7,10 @@
 #include "kilate/parser.h"
 #include "kilate/vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   klt_environment* env;
   klt_node_fnparam_vector* params;
@@ -38,8 +42,8 @@ klt_native_fnentry* klt_native_find_function(klt_str);
 
 void klt_native_register_all_functions();
 
-klt_node* klt_native_print(klt_native_fndata*);
-klt_node* klt_native_system(klt_native_fndata*);
-klt_node* klt_native_sleep(klt_native_fndata*);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

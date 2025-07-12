@@ -3,6 +3,10 @@
 
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   void* data;
   size_t capacity;
@@ -25,5 +29,9 @@ void klt_vector_insert(klt_vector*, const size_t, const void*);
 void klt_vector_push_back(klt_vector*, const void*);
 
 void klt_vector_remove(klt_vector*, size_t);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

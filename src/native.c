@@ -7,14 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(_WIN32) || defined(_WIN64)
-#include <windows.h>
-#define psleep(ms) Sleep(ms)
-#else
-#include <unistd.h>
-#define psleep(ms) usleep(ms * 1000)
-#endif
-
 #include "kilate/config.h"
 #include "kilate/lexer.h"
 #include "kilate/node.h"
@@ -25,7 +17,6 @@ klt_node_vector* native_functions = NULL;
 
 void klt_native_init() {
   native_functions = klt_vector_make(sizeof(klt_native_fnentry*));
-  klt_native_register_all_functions();
   klt_native_load_extern();
 }
 
@@ -74,30 +65,6 @@ void klt_native_end() {
   klt_vector_delete(native_functions);
 }
 
-void klt_native_register_all_functions() {
-  {
-    // Register native print method
-    klt_str_vector* requiredParams = klt_vector_make(sizeof(klt_str*));
-    klt_str any = "any";
-    klt_vector_push_back(requiredParams, &any);
-    klt_native_register_fn("print", requiredParams, klt_native_print);
-  }
-  {
-    // Register native system method
-    klt_str_vector* requiredParams = klt_vector_make(sizeof(klt_str*));
-    klt_str str = "string";
-    klt_vector_push_back(requiredParams, &str);
-    klt_native_register_fn("system", requiredParams, klt_native_system);
-  }
-  {
-    // Register native system method
-    klt_str_vector* requiredParams = klt_vector_make(sizeof(klt_str*));
-    klt_str str = "long";
-    klt_vector_push_back(requiredParams, &str);
-    klt_native_register_fn("sleep", requiredParams, klt_native_sleep);
-  }
-}
-
 void klt_native_register_fnentry(klt_native_fnentry* entry) {
   klt_vector_push_back(native_functions, &entry);
 }
@@ -120,84 +87,5 @@ klt_native_fnentry* klt_native_find_function(klt_str name) {
       return entry;
     }
   }
-  return NULL;
-}
-
-klt_node* klt_native_print(klt_native_fndata* data) {
-  for (size_t i = 0; i < data->params->size; ++i) {
-    klt_node_fnparam* param =
-        *(klt_node_fnparam**)klt_vector_get(data->params, i);
-    if (param->type == NODE_VALUE_TYPE_VAR) {
-      klt_node* var = klt_environment_getvar(data->env, param->value);
-      void* value = var->vardec_n.var_value;
-      switch (var->vardec_n.var_value_type) {
-        case NODE_VALUE_TYPE_INT: {
-          printf("%d", (int)(intptr_t)value);
-          break;
-        }
-        case NODE_VALUE_TYPE_FLOAT: {
-          printf("%f", *(float*)value);
-          break;
-        }
-        case NODE_VALUE_TYPE_LONG: {
-          printf("%ld", (long)(intptr_t)value);
-          break;
-        }
-        case NODE_VALUE_TYPE_STRING:
-          printf("%s", (klt_str)value);
-          break;
-        case NODE_VALUE_TYPE_BOOL:
-          printf("%s", (klt_bool)(intptr_t)value ? "true" : "false");
-          break;
-        case NODE_VALUE_TYPE_FUNC:
-          // Does nothing for now
-          break;
-        case NODE_VALUE_TYPE_VAR:
-          // Does nothing for now
-          break;
-        default:
-          // Does nothing for now
-          break;
-      }
-      continue;
-    }
-    printf("%s", param->value);
-  }
-  free(data);
-  return NULL;
-}
-
-klt_node* klt_native_system(klt_native_fndata* data) {
-  for (size_t i = 0; i < data->params->size; ++i) {
-    klt_node_fnparam* param =
-        *(klt_node_fnparam**)klt_vector_get(data->params, i);
-    if (param->type == NODE_VALUE_TYPE_VAR) {
-      klt_node* var = klt_environment_getvar(data->env, param->value);
-      void* value = var->vardec_n.var_value;
-      switch (var->vardec_n.var_value_type) {
-        case NODE_VALUE_TYPE_STRING:
-          system((klt_str)value);
-          break;
-        default:
-          break;
-      }
-      continue;
-    }
-    system(param->value);
-  }
-  free(data);
-  return NULL;
-}
-
-klt_node* klt_native_sleep(klt_native_fndata* data) {
-  klt_node_fnparam* param =
-      *(klt_node_fnparam**)klt_vector_get(data->params, 0);
-  if (param->type == NODE_VALUE_TYPE_VAR) {
-    klt_node* var = klt_environment_getvar(data->env, param->value);
-    if (var->vardec_n.var_value_type != NODE_VALUE_TYPE_INT) {
-      psleep((int)(intptr_t)param->value);
-    }
-  }
-  psleep(klt_str_to_int(param->value));
   return NULL;
 }

@@ -5,6 +5,10 @@
 #include "kilate/node.h"
 #include "kilate/string.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct klt_env_entry {
   klt_str name;
   klt_node* value;
@@ -29,5 +33,9 @@ klt_node* klt_environment_getvar(klt_environment* env, const klt_str name);
 klt_bool klt_environment_setvar(klt_environment* env,
                                 const klt_str name,
                                 void* value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

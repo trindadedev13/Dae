@@ -5,6 +5,14 @@
 
 #include "kilate/string.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void klt_error_fatal(klt_str, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

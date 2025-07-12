@@ -9,6 +9,10 @@
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   klt_token_vector* tokens;
   klt_node_vector* nodes;
@@ -51,5 +55,9 @@ void klt_parser_parse_program(klt_parser*);
 klt_node* klt_parser_parse_function(klt_parser*);
 
 void klt_parser_error(klt_token*, klt_str, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

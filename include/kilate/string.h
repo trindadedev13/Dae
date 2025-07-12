@@ -7,6 +7,10 @@
 #include "kilate/bool.h"
 #include "kilate/vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef char* klt_str;
 typedef klt_vector klt_str_vector;
 
@@ -29,5 +33,9 @@ float klt_str_to_float(klt_str);
 long klt_str_to_long(klt_str);
 
 klt_str klt_str_format(const klt_str, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

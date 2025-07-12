@@ -19,25 +19,19 @@ work main(): bool {
 
 ### 🐧 Linux
 
-> Requirements: cmake, make, C++ compiler (g++ or clang)
+> Requirements: ruby, cmake, make, C++ compiler (g++ or clang)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/trindadedev13/kilate.git
+git clone https://github.com/kilate-lang/kilate
 cd kilate
-```
-
-### 2. Allow make.sh to run
-
-```bash
-chmod +x Make.sh
 ```
 
 ### 3. Install
 
 ```
-./Make.sh -i
+ruby build.rb --install
 ```
 
 ## How to use Kilate-Interpreter

@@ -38,7 +38,7 @@ set(LIB_SOURCES
     src/native.c
     src/string.c
     src/vector.c
-    src/cpp/native.cpp)
+    src/util/native.c)
 
 set(HEADERS
     include/kilate/config.h
@@ -53,7 +53,7 @@ set(HEADERS
     include/kilate/native.h
     include/kilate/string.h
     include/kilate/vector.h
-    include/kilate/cpp/native.hpp)
+    include/kilate/util/native.h)
 
 set(EXE_SOURCES
     src/main.c

@@ -5,6 +5,10 @@
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
   NODE_FUNCTION,
   NODE_CALL,
@@ -87,5 +91,9 @@ klt_node* klt_return_node_make(klt_node_valuetype, void*);
 klt_node* klt_var_dec_node_make(klt_str, klt_str, klt_node_valuetype, void*);
 
 klt_node* klt_import_node_make(klt_str);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

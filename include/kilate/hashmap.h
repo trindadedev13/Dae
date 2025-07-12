@@ -6,6 +6,10 @@
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef klt_vector klt_hashmap_vector;
 typedef klt_vector klt_hashitem_vector;
 
@@ -30,5 +34,9 @@ unsigned int klt_hash_map_hash(klt_hashmap*, klt_str);
 void* klt_hash_map_get(klt_hashmap*, klt_str);
 
 void klt_hash_map_put(klt_hashmap*, klt_str, void*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

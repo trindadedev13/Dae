@@ -7,6 +7,10 @@
 #include "kilate/string.h"
 #include "kilate/vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   klt_hashmap* functions;
   klt_hashmap* native_functions;
@@ -31,5 +35,9 @@ klt_interpreter_result klt_interpreter_run_fn(klt_interpreter*,
                                               klt_str_vector*);
 
 klt_interpreter_result klt_interpreter_run_node(klt_interpreter*, klt_node*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
