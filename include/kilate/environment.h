@@ -21,13 +21,13 @@ klt_environment* klt_environment_make(klt_environment* parent);
 void klt_environment_destroy(klt_environment* env);
 
 klt_bool klt_environment_definevar(klt_environment* env,
-                                const klt_str name,
-                                void* value);
+                                   const klt_str name,
+                                   void* value);
 
 klt_node* klt_environment_getvar(klt_environment* env, const klt_str name);
 
 klt_bool klt_environment_setvar(klt_environment* env,
-                             const klt_str name,
-                             void* value);
+                                const klt_str name,
+                                void* value);
 
 #endif

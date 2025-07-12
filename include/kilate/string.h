@@ -30,6 +30,4 @@ long klt_str_to_long(klt_str);
 
 klt_str klt_str_format(const klt_str, ...);
 
-klt_str klt_str_interpret_escapes(klt_str);
-
 #endif

@@ -102,9 +102,62 @@ void klt_lexer_advance(klt_lexer* lexer) {
   lexer->__pos__++;
 }
 
+klt_str klt_lexer_read_string(klt_lexer* lexer, klt_bool* closed) {
+  size_t input_len = klt_str_length(lexer->__input__);
+  size_t start = lexer->__pos__ + 1;  // após o "
+  size_t buf_size = input_len - start + 1;
+  klt_str buffer = malloc(buf_size);
+  size_t buf_index = 0;
+
+  *closed = false;
+
+  klt_lexer_advance(lexer);
+
+  while (lexer->__pos__ < input_len) {
+    char ch = lexer->__input__[lexer->__pos__];
+    if (ch == '\\') {
+      lexer->__pos__++;
+      if (lexer->__pos__ >= input_len)
+        break;
+      char next = lexer->__input__[lexer->__pos__];
+      switch (next) {
+        case 'n':
+          buffer[buf_index++] = '\n';
+          break;
+        case 't':
+          buffer[buf_index++] = '\t';
+          break;
+        case 'r':
+          buffer[buf_index++] = '\r';
+          break;
+        case '"':
+          buffer[buf_index++] = '"';
+          break;
+        case '\\':
+          buffer[buf_index++] = '\\';
+          break;
+        default:
+          buffer[buf_index++] = next;
+          break;
+      }
+      lexer->__pos__++;
+    } else if (ch == '"') {
+      lexer->__pos__++;
+      *closed = true;
+      break;
+    } else {
+      buffer[buf_index++] = ch;
+      lexer->__pos__++;
+    }
+  }
+
+  buffer[buf_index] = '\0';
+  return buffer;
+}
+
 void klt_lexer_tokenize(klt_lexer* lexer) {
-  size_t inputLen = klt_str_length(lexer->__input__);
-  while (lexer->__pos__ < inputLen) {
+  size_t input_len = klt_str_length(lexer->__input__);
+  while (lexer->__pos__ < input_len) {
     char c = lexer->__input__[lexer->__pos__];
     if (isspace(c)) {
       klt_lexer_advance(lexer);
@@ -188,7 +241,7 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
     };
     if (klt_str_starts_with(lexer->__input__, "//", lexer->__pos__)) {
       lexer->__pos__ += 2;
-      while (lexer->__pos__ < inputLen &&
+      while (lexer->__pos__ < input_len &&
              lexer->__input__[lexer->__pos__] != '\n') {
         klt_lexer_advance(lexer);
       }
@@ -213,16 +266,11 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
       continue;
     }
     if (c == '"') {
-      size_t end = klt_str_index_of(lexer->__input__, '"', lexer->__pos__ + 1);
-      if (end == SIZE_MAX) {
-        printf("Unclosed string\n");
-        lexer->__pos__ = inputLen;
-        break;
-      }
-      klt_str str =
-          klt_str_substring(lexer->__input__, lexer->__pos__ + 1, end);
-      if (str == NULL) {
-        printf("Failed to get substr\n");
+      klt_bool closed;
+      klt_str str = klt_lexer_read_string(lexer, &closed);
+      if (!closed) {
+        free(str);
+        klt_lexer_error(lexer, "Unclosed string literal.");
         break;
       }
       size_t tkl = lexer->__line__;
@@ -230,14 +278,12 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
       klt_token* token = klt_token_make(TOKEN_STRING, str, tkl, tkc);
       klt_vector_push_back(lexer->tokens, &token);
       free(str);
-
-      lexer->__pos__ = end + 1;
       continue;
     }
     if (isdigit(c)) {
       size_t start = lexer->__pos__;
       klt_bool has_dot = false;
-      while (lexer->__pos__ < inputLen) {
+      while (lexer->__pos__ < input_len) {
         char ch = lexer->__input__[lexer->__pos__];
         if (isdigit(ch)) {
           klt_lexer_advance(lexer);
@@ -250,7 +296,7 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
       }
 
       klt_bool is_long = false;
-      if (lexer->__pos__ < inputLen &&
+      if (lexer->__pos__ < input_len &&
           (lexer->__input__[lexer->__pos__] == 'l' ||
            lexer->__input__[lexer->__pos__] == 'L')) {
         is_long = true;
@@ -281,7 +327,7 @@ void klt_lexer_tokenize(klt_lexer* lexer) {
 
     if (isalpha(c) || c == '_') {
       size_t start = lexer->__pos__;
-      while (lexer->__pos__ < inputLen &&
+      while (lexer->__pos__ < input_len &&
              (isalpha(lexer->__input__[lexer->__pos__]) ||
               isdigit(lexer->__input__[lexer->__pos__]) ||
               lexer->__input__[lexer->__pos__] == '_')) {

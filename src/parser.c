@@ -153,27 +153,33 @@ klt_node_valuetype klt_parser_str_to_nodevaluetype(klt_str value) {
 }
 
 klt_node* klt_parser_parse_statement(klt_parser* parser) {
-  klt_token* token = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+  klt_token* token =
+      *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
   if (token->type == TOKEN_KEYWORD && klt_str_equals(token->text, "return")) {
     klt_parser_consume(parser, TOKEN_KEYWORD);
-    klt_token* arrow = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+    klt_token* arrow =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
     if (arrow->type == TOKEN_RARROW || arrow->type == TOKEN_LARROW) {
       klt_parser_consume(parser, arrow->type);
     }
-    klt_token* next = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+    klt_token* next =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
     void* value;
     klt_node_valuetype type;
 
     if (next->type == TOKEN_BOOL) {
-      klt_bool rawBool = klt_str_equals(klt_parser_consume(parser, TOKEN_BOOL)->text, "true");
+      klt_bool rawBool =
+          klt_str_equals(klt_parser_consume(parser, TOKEN_BOOL)->text, "true");
       value = (void*)(intptr_t)rawBool;
       type = NODE_VALUE_TYPE_BOOL;
     } else if (next->type == TOKEN_INT) {
-      value = (void*)(intptr_t)klt_str_to_int(klt_parser_consume(parser, TOKEN_INT)->text);
+      value = (void*)(intptr_t)klt_str_to_int(
+          klt_parser_consume(parser, TOKEN_INT)->text);
       type = NODE_VALUE_TYPE_INT;
     } else if (next->type == TOKEN_FLOAT) {
-      float fval = klt_str_to_float(klt_parser_consume(parser, TOKEN_FLOAT)->text);
+      float fval =
+          klt_str_to_float(klt_parser_consume(parser, TOKEN_FLOAT)->text);
       value = malloc(sizeof(float));
       memcpy(value, &fval, sizeof(float));
       type = NODE_VALUE_TYPE_FLOAT;
@@ -186,8 +192,10 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       type = NODE_VALUE_TYPE_STRING;
     } else if (next->type == TOKEN_IDENTIFIER) {
       klt_token* id_token = next;
-      klt_token* after = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__ + 1);
-      if (after->type == TOKEN_RARROW || after->type == TOKEN_LARROW || after->type == TOKEN_LPAREN) {
+      klt_token* after =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__ + 1);
+      if (after->type == TOKEN_RARROW || after->type == TOKEN_LARROW ||
+          after->type == TOKEN_LPAREN) {
         klt_node* call = klt_parser_parse_call_node(parser, id_token);
         value = call;
         type = NODE_VALUE_TYPE_CALL;
@@ -201,17 +209,20 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
     }
     return klt_return_node_make(type, value);
 
-  } else if (token->type == TOKEN_KEYWORD && klt_str_equals(token->text, "import")) {
+  } else if (token->type == TOKEN_KEYWORD &&
+             klt_str_equals(token->text, "import")) {
     return klt_parser_parse_import(parser);
 
-  } else if (token->type == TOKEN_KEYWORD && klt_str_equals(token->text, "work")) {
+  } else if (token->type == TOKEN_KEYWORD &&
+             klt_str_equals(token->text, "work")) {
     return klt_parser_parse_function(parser);
 
   } else if (token->type == TOKEN_VAR || token->type == TOKEN_LET) {
     parser->__pos__++;
     klt_str var_name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
     klt_parser_consume(parser, TOKEN_ASSIGN);
-    klt_token* var_valueTk = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+    klt_token* var_valueTk =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
     klt_node_valuetype var_value_type;
     klt_str varInferredType;
@@ -225,7 +236,8 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       var_value = (void*)(intptr_t)temp;
       var_value_type = NODE_VALUE_TYPE_INT;
     } else if (var_valueTk->type == TOKEN_FLOAT) {
-      float fval = klt_str_to_float(klt_parser_consume(parser, TOKEN_FLOAT)->text);
+      float fval =
+          klt_str_to_float(klt_parser_consume(parser, TOKEN_FLOAT)->text);
       var_value = malloc(sizeof(float));
       memcpy(var_value, &fval, sizeof(float));
       var_value_type = NODE_VALUE_TYPE_FLOAT;
@@ -234,13 +246,16 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       var_value = (void*)(intptr_t)lval;
       var_value_type = NODE_VALUE_TYPE_LONG;
     } else if (var_valueTk->type == TOKEN_BOOL) {
-      klt_bool rawBool = klt_str_equals(klt_parser_consume(parser, TOKEN_BOOL)->text, "true");
+      klt_bool rawBool =
+          klt_str_equals(klt_parser_consume(parser, TOKEN_BOOL)->text, "true");
       var_value = (void*)(intptr_t)rawBool;
       var_value_type = NODE_VALUE_TYPE_BOOL;
     } else if (var_valueTk->type == TOKEN_IDENTIFIER) {
       klt_token* id_token = var_valueTk;
-      klt_token* next = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__ + 1);
-      if (next->type == TOKEN_RARROW || next->type == TOKEN_LARROW || next->type == TOKEN_LPAREN) {
+      klt_token* next =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__ + 1);
+      if (next->type == TOKEN_RARROW || next->type == TOKEN_LARROW ||
+          next->type == TOKEN_LPAREN) {
         klt_node* call_node = klt_parser_parse_call_node(parser, id_token);
         var_value = call_node;
         var_value_type = NODE_VALUE_TYPE_CALL;
@@ -253,13 +268,15 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       var_value_type = NODE_VALUE_TYPE_ANY;
     }
     varInferredType = klt_parser_nodevaluetype_to_str(var_value_type);
-    return klt_var_dec_node_make(var_name, varInferredType, var_value_type, var_value);
+    return klt_var_dec_node_make(var_name, varInferredType, var_value_type,
+                                 var_value);
 
   } else if (token->type == TOKEN_TYPE) {
     klt_str var_type = klt_parser_consume(parser, TOKEN_TYPE)->text;
     klt_str var_name = klt_parser_consume(parser, TOKEN_IDENTIFIER)->text;
     klt_parser_consume(parser, TOKEN_ASSIGN);
-    klt_token* valueTk = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
+    klt_token* valueTk =
+        *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__);
 
     klt_node_valuetype var_value_type;
     void* var_value;
@@ -290,8 +307,10 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
       var_value = (void*)(intptr_t)bval;
       var_value_type = NODE_VALUE_TYPE_BOOL;
     } else if (valueTk->type == TOKEN_IDENTIFIER) {
-      klt_token* next = *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__ + 1);
-      if (next->type == TOKEN_RARROW || next->type == TOKEN_LARROW || next->type == TOKEN_LPAREN) {
+      klt_token* next =
+          *(klt_token**)klt_vector_get(parser->tokens, parser->__pos__ + 1);
+      if (next->type == TOKEN_RARROW || next->type == TOKEN_LARROW ||
+          next->type == TOKEN_LPAREN) {
         klt_node* call_node = klt_parser_parse_call_node(parser, valueTk);
         var_value = call_node;
         var_value_type = NODE_VALUE_TYPE_CALL;
@@ -301,16 +320,18 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
         var_value_type = NODE_VALUE_TYPE_VAR;
       }
     } else {
-      klt_parser_error(valueTk, "Unsupported value in typed variable declaration.");
+      klt_parser_error(valueTk,
+                       "Unsupported value in typed variable declaration.");
       return NULL;
     }
 
     klt_str expected = var_type;
     klt_str actual = klt_parser_tokentype_to_str(valueTk->type);
     if (!klt_str_equals(expected, "any") && !klt_str_equals(expected, actual)) {
-      klt_parser_error(valueTk,
-        "Type mismatch in declaration of '%s': expected '%s', got '%s",
-        var_name, expected, actual);
+      klt_parser_error(
+          valueTk,
+          "Type mismatch in declaration of '%s': expected '%s', got '%s",
+          var_name, expected, actual);
     }
     return klt_var_dec_node_make(var_name, var_type, var_value_type, var_value);
   } else if (token->type == TOKEN_IDENTIFIER) {
@@ -320,7 +341,6 @@ klt_node* klt_parser_parse_statement(klt_parser* parser) {
   klt_parser_error(token, "Unknown statement: %s", token->text);
   return NULL;
 }
-
 
 klt_node_fnparam_vector* klt_parser_parse_fnparams(klt_parser* parser) {
   klt_node_fnparam_vector* params =

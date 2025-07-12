@@ -106,34 +106,3 @@ klt_str klt_str_format(const klt_str fmt, ...) {
 
   return buffer;
 }
-
-klt_str klt_str_interpret_escapes(klt_str input) {
-  size_t len = klt_str_length(input);
-  klt_str output = malloc(len + 1);
-  size_t j = 0;
-
-  for (size_t i = 0; i < len; ++i) {
-    if (input[i] == '\\' && i + 1 < len) {
-      i++;
-      switch (input[i]) {
-        case 'n':
-          output[j++] = '\n';
-          break;
-        case 't':
-          output[j++] = '\t';
-          break;
-        case '\\':
-          output[j++] = '\\';
-          break;
-        default:
-          output[j++] = input[i];
-          break;
-      }
-    } else {
-      output[j++] = input[i];
-    }
-  }
-
-  output[j] = '\0';
-  return output;
-}

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "kilate/error.h"
 #include "kilate/config.h"
+#include "kilate/error.h"
 #include "kilate/file.h"
 #include "kilate/interpreter.h"
 #include "kilate/lexer.h"
@@ -93,7 +93,8 @@ klt_bool run(int argc, char* argv[]) {
         return false;
       }
     } else {
-      klt_str dup = strdup(arg);;
+      klt_str dup = strdup(arg);
+      ;
       klt_vector_push_back(files, &dup);
     }
   }

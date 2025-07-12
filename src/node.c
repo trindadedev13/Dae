@@ -7,7 +7,8 @@
 #include "kilate/vector.h"
 
 void klt_node_delete(klt_node* node) {
-  if (node == NULL) return;
+  if (node == NULL)
+    return;
   if (node->type == NODE_FUNCTION) {
     free(node->function_n.fn_name);
     if (node->function_n.fn_return_type != NULL) {

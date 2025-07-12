@@ -32,7 +32,7 @@ void klt_native_init() {
 void klt_native_load_extern() {
   // Load ALL Native Libs found
   for (size_t i = 0; i < libs_native_directories->size; i++) {
-    klt_str dir = *(klt_str*) klt_vector_get(libs_native_directories, i);
+    klt_str dir = *(klt_str*)klt_vector_get(libs_native_directories, i);
     DIR* d = opendir(dir);
     if (!d)
       return;
@@ -161,9 +161,7 @@ klt_node* klt_native_print(klt_native_fndata* data) {
       }
       continue;
     }
-    klt_str interpreted = klt_str_interpret_escapes(param->value);
-    printf("%s", interpreted);
-    free(interpreted);
+    printf("%s", param->value);
   }
   free(data);
   return NULL;

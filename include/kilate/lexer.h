@@ -58,6 +58,8 @@ void klt_lexer_delete(klt_lexer*);
 
 void klt_lexer_advance(klt_lexer*);
 
+klt_str klt_lexer_read_string(klt_lexer*, klt_bool*);
+
 void klt_lexer_tokenize(klt_lexer*);
 
 void klt_lexer_error(klt_lexer*, klt_str, ...);
