@@ -57,7 +57,7 @@ set(HEADERS
 
 set(EXE_SOURCES
     src/main.c
-    src/cpp/native.cpp)
+    ${LIB_SOURCES}) # Add libs sources to executable, to avoid unused files removal.
 
 if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}_shared SHARED ${LIB_SOURCES} ${HEADERS})
