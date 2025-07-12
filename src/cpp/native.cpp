@@ -24,7 +24,7 @@ std::string getFnDataString(klt_native_fndata* data, size_t index) {
     return param->value;
   }
 
-  klt_node* var = klt_environment_get(data->env, param->value);
+  klt_node* var = klt_environment_getvar(data->env, param->value);
   if (!var || var->vardec_n.var_value_type != NODE_VALUE_TYPE_STRING)
     return nullptr;
 
@@ -49,7 +49,7 @@ int getFnDataInt(klt_native_fndata* data, size_t index, bool* ok) {
     return (int)(intptr_t)param->value;
   }
 
-  klt_node* var = klt_environment_get(data->env, param->value);
+  klt_node* var = klt_environment_getvar(data->env, param->value);
   if (!var || var->vardec_n.var_value_type != NODE_VALUE_TYPE_INT) {
     if (ok)
       *ok = false;
@@ -76,7 +76,7 @@ float getFnDataFloat(klt_native_fndata* data, size_t index, bool* ok) {
     return (int)(intptr_t)param->value;
   }
 
-  klt_node* var = klt_environment_get(data->env, param->value);
+  klt_node* var = klt_environment_getvar(data->env, param->value);
   if (!var || var->vardec_n.var_value_type != NODE_VALUE_TYPE_FLOAT) {
     if (ok)
       *ok = false;
@@ -103,7 +103,7 @@ long getFnDataLong(klt_native_fndata* data, size_t index, bool* ok) {
     return (int)(intptr_t)param->value;
   }
 
-  klt_node* var = klt_environment_get(data->env, param->value);
+  klt_node* var = klt_environment_getvar(data->env, param->value);
   if (!var || var->vardec_n.var_value_type != NODE_VALUE_TYPE_LONG) {
     if (ok)
       *ok = false;
@@ -130,7 +130,7 @@ bool getFnDataBool(klt_native_fndata* data, size_t index, bool* ok) {
     return (bool)(intptr_t)param->value;
   }
 
-  klt_node* var = klt_environment_get(data->env, param->value);
+  klt_node* var = klt_environment_getvar(data->env, param->value);
   if (!var || var->vardec_n.var_value_type != NODE_VALUE_TYPE_BOOL) {
     if (ok)
       *ok = false;

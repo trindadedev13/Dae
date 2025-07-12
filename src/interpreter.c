@@ -98,7 +98,7 @@ klt_interpreter_result klt_interpreter_run_fn(klt_interpreter* self,
       void* actualValue = param->value;
 
       if (param->type == NODE_VALUE_TYPE_VAR) {
-        klt_node* real_var = klt_environment_get(old, (klt_str)param->value);
+        klt_node* real_var = klt_environment_getvar(old, (klt_str)param->value);
         if (real_var == NULL) {
           klt_error_fatal("Variable not defined: %s", (klt_str)param->value);
         }
@@ -119,7 +119,7 @@ klt_interpreter_result klt_interpreter_run_fn(klt_interpreter* self,
           fnParam->value, klt_parser_nodevaluetype_to_str(fnParam->type),
           actualType, actualValue);
       klt_node* var_copy = klt_node_copy(var);
-      klt_environment_define(self->env, var_copy->vardec_n.var_name, var_copy);
+      klt_environment_definevar(self->env, var_copy->vardec_n.var_name, var_copy);
     }
   }
 
@@ -194,7 +194,7 @@ klt_interpreter_result klt_interpreter_run_node(klt_interpreter* self,
     }
 
     case NODE_VARDEC: {
-      klt_environment_define(self->env, node->vardec_n.var_name, klt_node_copy(node));
+      klt_environment_definevar(self->env, node->vardec_n.var_name, klt_node_copy(node));
       return (klt_interpreter_result){.type = IRT_FUNC, .data = NULL};
     }
 

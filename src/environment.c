@@ -12,7 +12,7 @@ klt_environment* klt_environment_make(klt_environment* parent) {
   if (env == NULL)
     klt_error_fatal("Failed to allocate environment");
 
-  env->entries = NULL;
+  env->variables = NULL;
   env->parent = parent;
   return env;
 }
@@ -21,7 +21,7 @@ void klt_environment_destroy(klt_environment* env) {
   if (env == NULL)
     return;
 
-  klt_env_entry* current = env->entries;
+  klt_env_entry* current = env->variables;
   while (current) {
     klt_env_entry* next = current->next;
     free(current->name);
@@ -35,13 +35,13 @@ void klt_environment_destroy(klt_environment* env) {
   free(env);
 }
 
-klt_bool klt_environment_define(klt_environment* env,
+klt_bool klt_environment_definevar(klt_environment* env,
                                 const klt_str name,
                                 void* value) {
   if (env == NULL || name == NULL)
     klt_error_fatal("Environment or name is null.");
 
-  klt_env_entry* current = env->entries;
+  klt_env_entry* current = env->variables;
   while (current) {
     if (klt_str_equals(current->name, name)) {
       return false;
@@ -55,19 +55,19 @@ klt_bool klt_environment_define(klt_environment* env,
 
   new_entry->name = strdup(name);
   new_entry->value = value;
-  new_entry->next = env->entries;
+  new_entry->next = env->variables;
 
-  env->entries = new_entry;
+  env->variables = new_entry;
   return true;
 }
 
-klt_node* klt_environment_get(klt_environment* env, const klt_str name) {
+klt_node* klt_environment_getvar(klt_environment* env, const klt_str name) {
   if (env == NULL || name == NULL)
     klt_error_fatal("Environment or name is null.");
 
   klt_environment* current_env = env;
   while (current_env) {
-    klt_env_entry* current = current_env->entries;
+    klt_env_entry* current = current_env->variables;
     while (current) {
       if (strcmp(current->name, name) == 0) {
         return current->value;
@@ -80,7 +80,7 @@ klt_node* klt_environment_get(klt_environment* env, const klt_str name) {
   return NULL;
 }
 
-klt_bool klt_environment_set(klt_environment* env,
+klt_bool klt_environment_setvar(klt_environment* env,
                              const klt_str name,
                              void* value) {
   if (env == NULL || name == NULL)
@@ -88,7 +88,7 @@ klt_bool klt_environment_set(klt_environment* env,
 
   klt_environment* current_env = env;
   while (current_env) {
-    klt_env_entry* current = current_env->entries;
+    klt_env_entry* current = current_env->variables;
     while (current) {
       if (strcmp(current->name, name) == 0) {
         current->value = value;
